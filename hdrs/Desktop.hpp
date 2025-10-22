@@ -2,17 +2,25 @@
 
 #include <SDL2/SDL.h>
 
-class Desktop
+namespace lge
 {
-	private:
-		unsigned int	desktopWidth;
-		unsigned int	desktopHeight;
-		bool			running;
-		SDL_Window*		window;
-	private:
-		void	setDesktopData();
-	public:
-		Desktop();
-		~Desktop();
-		void setDesktopWidth();
-};
+	class Desktop
+	{
+		private:
+			unsigned int desktopWidth;
+			unsigned int desktopHeight;
+			bool running;
+			SDL_Window* window;
+			SDL_GLContext glContext;
+
+		public:
+			lgeDesktop();
+			~lgeDesktop();
+
+			unsigned int getDesktopHeight();
+			unsigned int getDesktopWidth();
+			void setDesktopHeight(unsigned int height);
+			void setDesktopWidth(unsigned int width);
+			void setDesktopData();
+	};
+}

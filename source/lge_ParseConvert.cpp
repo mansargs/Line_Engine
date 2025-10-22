@@ -3,16 +3,16 @@
 #include <fstream>
 #include "../hdrs/Lge.hpp"
 
-void	Lge::cellColor(Pixel &cell, const std::string &zAxis, const std::string &color)
+void	Lge::cellColor(Pixel &cell, const std::string &color)
 {
 	if (color.empty())
 		return ;
-	unsigned int coloring = std::stoi(zAxis);
+	unsigned int coloring = std::stoul(color, nullptr, 16);
 	cell.color.r = (coloring >> 16) & 0xFF;
 	cell.color.g = (coloring >> 8) & 0xFF;
 	cell.color.b = coloring & 0xFF;
 	if (color.length() == 4 || color.length() == 8)
-		cell.color.a = ((coloring >> 24) & 0xFF) / 255.0f;
+		cell.color.a = (coloring >> 24) & 0xFF;
 }
 
 int	Lge::convertToPixels(const gridContent &mapContent)
@@ -23,7 +23,7 @@ int	Lge::convertToPixels(const gridContent &mapContent)
 
 	for (size_t i = 0; i < height; ++i)
 	{
-		for (size_t j = 0; j < height; ++j)
+		for (size_t j = 0; j < width; ++j)
 		{
 			std::string zAxis, color;
 			size_t found = mapContent[i][j].find(',');
@@ -41,7 +41,7 @@ int	Lge::convertToPixels(const gridContent &mapContent)
 			mapPixels[i][j].position.x = j;
 			mapPixels[i][j].position.y = i;
 			mapPixels[i][j].position.z = std::stoi(zAxis);
-			cellColor(mapPixels[i][j], zAxis, color.erase(0, 3));
+			cellColor(mapPixels[i][j], color.erase(0, 3));
 		}
 	}
 	return 0;

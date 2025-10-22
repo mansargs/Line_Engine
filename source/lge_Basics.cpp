@@ -9,7 +9,17 @@ size_t	Lge::getWidth() const { return width;}
 
 size_t	Lge::getHeight() const { return height;}
 
-Lge::Lge() : width(0), height(0) {}
+Lge::Lge() : width(0), height(0), VAO(0), VBO(0), shader(nullptr), vertexCount(0) {}
+
+Lge::~Lge()
+{
+	if (VAO != 0)
+		glDeleteVertexArrays(1, &VAO);
+	if (VBO != 0)
+		glDeleteBuffers(1, &VBO);
+	if (shader != nullptr)
+		delete shader;
+}
 
 // void	Lge::printMap(const gridContent &mapContent) const
 // {

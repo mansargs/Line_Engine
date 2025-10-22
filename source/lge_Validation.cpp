@@ -22,7 +22,6 @@ bool	Lge::verifyFile(const std::string &filename)
 		std::cerr << "\033[31mError: File cannot open file\033[0m\n";
 		return false;
 	}
-	file.close();
 	return true;
 }
 bool	Lge::validNumber(const std::string &strNumber)
@@ -52,7 +51,7 @@ bool	Lge::validColor(const std::string &strColor)
 	if (strColor.length() != 6 && strColor.length() != 7
 		&& strColor.length() != 9 && strColor.length() != 11)
 		return false;
-	if (strColor[i] != '0' && strColor[i + 1] != 'x')
+	if (strColor[i] != '0' || strColor[i + 1] != 'x')
 		return false;
 	i += 2;
 	for (; i < strColor.length(); ++i)
