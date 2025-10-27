@@ -1,12 +1,18 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include "../hdrs/Lge.hpp"
+#include "../hdrs/Map.hpp"
 
-void	Lge::cellColor(Pixel &cell, const std::string &color)
+void	lge::Map::cellColor(Pixel &cell, const std::string &color)
 {
 	if (color.empty())
+	{
+		cell.color.r = 255.0f;
+		cell.color.g = 255.0f;
+		cell.color.b = 255.0f;
+		cell.color.a = 255.0f;
 		return ;
+	}
 	unsigned int coloring = std::stoul(color, nullptr, 16);
 	cell.color.r = (coloring >> 16) & 0xFF;
 	cell.color.g = (coloring >> 8) & 0xFF;
@@ -15,15 +21,15 @@ void	Lge::cellColor(Pixel &cell, const std::string &color)
 		cell.color.a = (coloring >> 24) & 0xFF;
 }
 
-int	Lge::convertToPixels(const gridContent &mapContent)
+int	lge::Map::convertToPixels(const gridFile &mapContent)
 {
-	mapPixels.resize(height);
-	for (auto &row : mapPixels)
-	row.resize(width);
+	mapData.resize(mapHeight);
+	for (auto &row : mapData)
+	row.resize(mapWidth);
 
-	for (size_t i = 0; i < height; ++i)
+	for (size_t i = 0; i < mapHeight; ++i)
 	{
-		for (size_t j = 0; j < width; ++j)
+		for (size_t j = 0; j < mapWidth; ++j)
 		{
 			std::string zAxis, color;
 			size_t found = mapContent[i][j].find(',');
@@ -38,16 +44,16 @@ int	Lge::convertToPixels(const gridContent &mapContent)
 				return -1;
 			if (!validColor(color))
 				return -1;
-			mapPixels[i][j].position.x = j;
-			mapPixels[i][j].position.y = i;
-			mapPixels[i][j].position.z = std::stoi(zAxis);
-			cellColor(mapPixels[i][j], color.erase(0, 3));
+			mapData[i][j].position.x = j;
+			mapData[i][j].position.y = i;
+			mapData[i][j].position.z = std::stoi(zAxis);
+			cellColor(mapData[i][j], color.substr(1));
 		}
 	}
 	return 0;
 }
 
-int Lge::parseLine(const std::string &line, gridContent &mapContent)
+int lge::Map::parseLine(const std::string &line, gridFile &mapContent)
 {
 	std::istringstream			lineStream(line);
 	std::string					cell;
@@ -65,17 +71,17 @@ int Lge::parseLine(const std::string &line, gridContent &mapContent)
 		return -1;
 	}
 	mapContent.push_back(row);
-	++height;
-	if (widthEach > width)
-		width = widthEach;
+	++mapHeight;
+	if (widthEach > mapWidth)
+		mapWidth = widthEach;
 	return 0;
 }
 
-int	Lge::parseFile(const std::string &filename)
+int	lge::Map::parseFile(const std::string &filename)
 {
 	std::ifstream	file(filename);
 	std::string		line;
-	gridContent		mapContent;
+	gridFile		mapContent;
 
 	if (file.is_open())
 	{
@@ -96,6 +102,5 @@ int	Lge::parseFile(const std::string &filename)
 		return -1;
 	}
 	convertToPixels(mapContent);
-	// printMap(mapContent);
 	return 0;
 };

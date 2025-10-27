@@ -1,9 +1,9 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include "../hdrs/Lge.hpp"
+#include "../hdrs/Map.hpp"
 
-bool	Lge::verifyFile(const std::string &filename)
+bool	lge::Map::verifyFile(const std::string &filename)
 {
 	std::filesystem::path filePath = "./" + filename;
 	if (!std::filesystem::exists(filePath))
@@ -24,7 +24,7 @@ bool	Lge::verifyFile(const std::string &filename)
 	}
 	return true;
 }
-bool	Lge::validNumber(const std::string &strNumber)
+bool	lge::Map::validNumber(const std::string &strNumber)
 {
 	if (strNumber.empty())
 		return false;
@@ -42,7 +42,7 @@ bool	Lge::validNumber(const std::string &strNumber)
 	return true;
 }
 
-bool	Lge::validColor(const std::string &strColor)
+bool	lge::Map::validColor(const std::string &strColor)
 {
 	size_t i = 1;
 
@@ -51,7 +51,7 @@ bool	Lge::validColor(const std::string &strColor)
 	if (strColor.length() != 6 && strColor.length() != 7
 		&& strColor.length() != 9 && strColor.length() != 11)
 		return false;
-	if (strColor[i] != '0' || strColor[i + 1] != 'x')
+	if (strColor[i] != '0' || (strColor[i + 1] != 'x' && strColor[i + 1] != 'X'))
 		return false;
 	i += 2;
 	for (; i < strColor.length(); ++i)

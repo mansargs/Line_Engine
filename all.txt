@@ -1,64 +1,38 @@
-#include "../hdrs/Lge.hpp"
-#include <fstream>
-#include <iostream>
-#include <cctype>
-#include <sstream>
-#include <iomanip>
-
-size_t	Lge::getWidth() const { return width;}
-
-size_t	Lge::getHeight() const { return height;}
-
-Lge::Lge() : width(0), height(0) {}
-
-// void	Lge::printMap(const gridContent &mapContent) const
-// {
-// 	for (const auto &row : mapContent)
-// 	{
-// 		for (const auto &cell : row)
-// 		{
-// 			std::cout << std::setw(2) << cell << " ";
-// 		}
-// 		std::cout << std::endl;
-// 	}
-// 	std::cout << "Map Width: " << width << ", Height: " << height << std::endl;
-// }
-
-
 #include "../hdrs/Desktop.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include <GL/glew.h>
-#include "../hdrs/Lge.hpp"
+#include "../hdrs/Map.hpp"
 
-unsigned int lgeDesktop::getDesktopHeight() { return desktopHeight;}
+size_t lge::Desktop::getWindowHeight() { return windowHeight;}
 
-unsigned int lgeDesktop::getDesktopWidth() { return desktopWidth;}
+size_t lge::Desktop::getWindowWidth() { return windowWidth;}
 
-void lgeDesktop::setDesktopHeight(unsigned int height) { desktopHeight = height;}
+void lge::Desktop::setWindowHeight(unsigned int height) { windowHeight = height;}
 
-void lgeDesktop::setDesktopWidth(unsigned int width) { desktopWidth = width;}
+void lge::Desktop::setWindowWidth(unsigned int width) {windowWidth = width;}
 
-void lgeDesktop::setDesktopData()
+void lge::Desktop::initWindowParam()
 {
 	SDL_DisplayMode dm;
 	if (SDL_GetCurrentDisplayMode(0, &dm) != 0)
 		return;
-	desktopWidth = dm.w - 200;
-	desktopHeight = dm.h - 150;
+	windowWidth = dm.w - 200;
+	windowHeight = dm.h - 150;
 };
-lgeDesktop::lgeDesktop() : desktopWidth(1000), desktopHeight(800), running(false)
+lge::Desktop::Desktop() : windowWidth(DEFAULT_WIDTH), windowHeight(DEFAULT_HEIGHT), running(false)
 {
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0)
 		throw std::runtime_error(SDL_GetError());
-	setDesktopData();
+	initWindowParam();
 	window = SDL_CreateWindow("Line Engine",
 						  SDL_WINDOWPOS_CENTERED,
 						  SDL_WINDOWPOS_CENTERED,
-						  desktopWidth,
-						  desktopHeight,
-						  SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+						  windowWidth,
+						  windowHeight,
+						  SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 
 	if (!window)
 		throw std::runtime_error(SDL_GetError());
@@ -71,13 +45,13 @@ lgeDesktop::lgeDesktop() : desktopWidth(1000), desktopHeight(800), running(false
 	glewExperimental = GL_TRUE;
 	if (glewInit() != GLEW_OK)
 		throw std::runtime_error("Failed to initialize OpenGL functional");
-	glViewport(0, 0, desktopWidth, desktopHeight);
+	glViewport(0, 0, windowWidth, windowHeight);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	if (SDL_GL_SetSwapInterval(1) < 0)
 		std::cerr << "Warning: Unable to set VSync: " << SDL_GetError() << std::endl;
 }
 
-lgeDesktop::~lgeDesktop()
+lge::Desktop::~Desktop()
 {
 	if (glContext)
 		SDL_GL_DeleteContext(glContext);
@@ -86,64 +60,91 @@ lgeDesktop::~lgeDesktop()
 	SDL_Quit();
 }
 
-void addVertex(std::vector<float> &vertex, const Pixel &data)
+// void addVertex(std::vector<float> &vertex, const Pixel &data)
+// {
+// 	vertex.insert(vertex.end(), {
+// 		data.position.x,
+// 		data.position.y,
+// 		data.position.z,
+// 		data.color.r / 255,
+// 		data.color.g / 255,
+// 		data.color.b / 255,
+// 		data.color.a / 255
+// 		}
+// 	);
+// }
+#include <memory>
+#include "../hdrs/Engine.hpp"
+
+lge::Engine::Engine() : desktop(std::make_unique<Desktop>()), mapData(std::make_unique<Map>()) {}
+
+lge::Engine& lge::Engine::getInstance()
 {
-	vertex.insert(vertex.end(), {
-		data.position.x,
-		data.position.y,
-		data.position.z,
-		data.color.r,
-		data.color.g,
-		data.color.b,
-		data.color.a
-		}
-	);
+	static lge::Engine instance;
+	return instance;
 }
 
-void	Lge::vertexes1D()
+lge::Desktop& lge::Engine::getDesktop() const
 {
-	std::vector<float> vertex;
-
-	for (int i = 0; i < height; ++i)
-	{
-		for (int j = 0; j < width - 1; ++j)
-		{
-			addVertex(vertex, mapPixels[i][j]);
-			addVertex(vertex, mapPixels[i][j + 1]);
-		}
-	}
-
-	for (int i = 0; i < height - 1; ++i)
-	{
-		for (int j = 0; j < width; ++j)
-		{
-			addVertex(vertex, mapPixels[i][j]);
-			addVertex(vertex, mapPixels[i + 1][j]);
-		}
-	}
-
-	GLuint VBO;
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertex.size() * sizeof(float), vertex.data(), GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-	glDrawArrays(GL_LINES, 0, vertex.size() / 7);
-
+	return *getInstance().desktop;
 }
+
+const lge::Map& lge::Engine::getMap() const
+{
+	return *getInstance().mapData;
+}
+
+#include <iostream>
+#include <fstream>
+#include <filesystem>
+#include <cstdlib>
+#include "../hdrs/Map.hpp"
+#include "../hdrs/Desktop.hpp"
+#include <SDL2/SDL.h>
+#include <GL/glew.h>
+
+int main(int argc, const char *argv[])
+{
+	if (argc != 2)
+	{
+		std::cerr << "\033[31mProgram must have one argument with the .lge extension!\033[0m\n";
+		return EXIT_FAILURE;
+	}
+	if (!lge::Map::verifyFile(std::string(argv[1])))
+		return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
+}
+#include "../hdrs/Map.hpp"
+#include <fstream>
+#include <iostream>
+#include <cctype>
+#include <sstream>
+#include <iomanip>
+
+size_t		lge::Map::getMapHeight() const { return mapHeight; }
+
+size_t		lge::Map::getMapWidth() const { return mapWidth; }
+
+
+
+
+
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include "../hdrs/Lge.hpp"
+#include "../hdrs/Map.hpp"
 
-void	Lge::cellColor(Pixel &cell, const std::string &zAxis, const std::string &color)
+void	lge::Map::cellColor(Pixel &cell, const std::string &color)
 {
 	if (color.empty())
+	{
+		cell.color.r = 255.0f;
+		cell.color.g = 255.0f;
+		cell.color.b = 255.0f;
+		cell.color.a = 255.0f;
 		return ;
+	}
 	unsigned int coloring = std::stoul(color, nullptr, 16);
 	cell.color.r = (coloring >> 16) & 0xFF;
 	cell.color.g = (coloring >> 8) & 0xFF;
@@ -152,15 +153,15 @@ void	Lge::cellColor(Pixel &cell, const std::string &zAxis, const std::string &co
 		cell.color.a = (coloring >> 24) & 0xFF;
 }
 
-int	Lge::convertToPixels(const gridContent &mapContent)
+int	lge::Map::convertToPixels(const gridFile &mapContent)
 {
-	mapPixels.resize(height);
-	for (auto &row : mapPixels)
-	row.resize(width);
+	mapData.resize(mapHeight);
+	for (auto &row : mapData)
+	row.resize(mapWidth);
 
-	for (size_t i = 0; i < height; ++i)
+	for (size_t i = 0; i < mapHeight; ++i)
 	{
-		for (size_t j = 0; j < width; ++j)
+		for (size_t j = 0; j < mapWidth; ++j)
 		{
 			std::string zAxis, color;
 			size_t found = mapContent[i][j].find(',');
@@ -175,16 +176,16 @@ int	Lge::convertToPixels(const gridContent &mapContent)
 				return -1;
 			if (!validColor(color))
 				return -1;
-			mapPixels[i][j].position.x = j;
-			mapPixels[i][j].position.y = i;
-			mapPixels[i][j].position.z = std::stoi(zAxis);
-			cellColor(mapPixels[i][j], zAxis, color.substr(3));
+			mapData[i][j].position.x = j;
+			mapData[i][j].position.y = i;
+			mapData[i][j].position.z = std::stoi(zAxis);
+			cellColor(mapData[i][j], color.substr(1));
 		}
 	}
 	return 0;
 }
 
-int Lge::parseLine(const std::string &line, gridContent &mapContent)
+int lge::Map::parseLine(const std::string &line, gridFile &mapContent)
 {
 	std::istringstream			lineStream(line);
 	std::string					cell;
@@ -202,17 +203,17 @@ int Lge::parseLine(const std::string &line, gridContent &mapContent)
 		return -1;
 	}
 	mapContent.push_back(row);
-	++height;
-	if (widthEach > width)
-		width = widthEach;
+	++mapHeight;
+	if (widthEach > mapWidth)
+		mapWidth = widthEach;
 	return 0;
 }
 
-int	Lge::parseFile(const std::string &filename)
+int	lge::Map::parseFile(const std::string &filename)
 {
 	std::ifstream	file(filename);
 	std::string		line;
-	gridContent		mapContent;
+	gridFile		mapContent;
 
 	if (file.is_open())
 	{
@@ -233,15 +234,14 @@ int	Lge::parseFile(const std::string &filename)
 		return -1;
 	}
 	convertToPixels(mapContent);
-	// printMap(mapContent);
 	return 0;
 };
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include "../hdrs/Lge.hpp"
+#include "../hdrs/Map.hpp"
 
-bool	Lge::verifyFile(const std::string &filename)
+bool	lge::Map::verifyFile(const std::string &filename)
 {
 	std::filesystem::path filePath = "./" + filename;
 	if (!std::filesystem::exists(filePath))
@@ -262,7 +262,7 @@ bool	Lge::verifyFile(const std::string &filename)
 	}
 	return true;
 }
-bool	Lge::validNumber(const std::string &strNumber)
+bool	lge::Map::validNumber(const std::string &strNumber)
 {
 	if (strNumber.empty())
 		return false;
@@ -280,7 +280,7 @@ bool	Lge::validNumber(const std::string &strNumber)
 	return true;
 }
 
-bool	Lge::validColor(const std::string &strColor)
+bool	lge::Map::validColor(const std::string &strColor)
 {
 	size_t i = 1;
 
@@ -289,7 +289,7 @@ bool	Lge::validColor(const std::string &strColor)
 	if (strColor.length() != 6 && strColor.length() != 7
 		&& strColor.length() != 9 && strColor.length() != 11)
 		return false;
-	if (strColor[i] != '0' || strColor[i + 1] != 'x')
+	if (strColor[i] != '0' || (strColor[i + 1] != 'x' && strColor[i + 1] != 'X'))
 		return false;
 	i += 2;
 	for (; i < strColor.length(); ++i)
@@ -299,37 +299,3 @@ bool	Lge::validColor(const std::string &strColor)
 	}
 	return true;
 }
-#include <iostream>
-#include <fstream>
-#include <filesystem>
-#include <cstdlib>
-#include "../hdrs/Lge.hpp"
-#include "../hdrs/Desktop.hpp"
-#include <SDL2/SDL.h>
-#include <GL/glew.h>
-
-int	main(int argc, const char *argv[])
-{
-	if (argc != 2)
-	{
-		std::cerr << "\033[31mProgram must have one argument with the .lge extension!\033[0m\n";
-		return EXIT_FAILURE;
-	}
-	if (!Lge::verifyFile(std::string(argv[1])))
-		return EXIT_FAILURE;
-	Lge content;
-	if (content.parseFile(std::string(argv[1])) != 0)
-		return EXIT_FAILURE;
-	try
-	{
-		lgeDesktop engine;
-		SDL_Delay(4000);
-	}
-	catch(const std::exception& e)
-	{
-		std::cerr << e.what() << '\n';
-	}
-	return EXIT_SUCCESS;
-}
-
-

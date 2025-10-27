@@ -8,7 +8,7 @@
 namespace lge
 {
 
-	using gridContent = std::vector<std::vector<std::string>>;
+	using gridFile = std::vector<std::vector<std::string>>;
 
 	struct Coord3
 	{
@@ -25,32 +25,31 @@ namespace lge
 		float a = 0.0f;
 	};
 
-struct Pixel
-{
-	Coord3		position;
-	Rgba		color;
-};
+	struct Pixel
+	{
+		Coord3		position;
+		Rgba		color;
+	};
 
 	class Map
 	{
 		using gridPixels = std::vector<std::vector<Pixel>>;
 		private:
-			size_t		mapWidth;
-			size_t		mapHeight;
-			gridPixels	mapPixels;
+			size_t		mapWidth {0};
+			size_t		mapHeight {0};
+			gridPixels	mapData;
 		private:
-			int			parseLine(const std::string &line, gridContent &mapContent);
-			int			convertToPixels(const gridContent &mapContent);
-			void		printMap(const gridContent &mapContent) const;
+			int			parseLine(const std::string &line, gridFile &mapContent);
+			int			convertToPixels(const gridFile &mapContent);
 			static bool	validColor(const std::string &strColor);
 			static bool	validNumber(const std::string &strNumber);
 			void		cellColor(Pixel &cell, const std::string &color);
 		public:
-			Map();
-			~Map();
-			int		parseFile(const std::string &filename);
-			size_t	getWindowWidth() const;
-			size_t	getWindowHeight() const;
+			Map() = default;
+
+			int			parseFile(const std::string &filename);
+			size_t		getMapWidth() const;
+			size_t		getMapHeight() const;
 			static bool	verifyFile(const std::string &filename);
 
 	};
