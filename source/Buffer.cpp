@@ -5,6 +5,7 @@
 #include <string>
 
 namespace lge {
+
 	void Buffer::bind() const {
 		if (is_initialized) {
 			glBindVertexArray(vao);
@@ -65,46 +66,39 @@ namespace lge {
 		}
 	}
 
-	Buffer::Buffer(const void* vertex_data, GLsizei size, GLenum usage)
-			: data_size(size) {
+	Buffer::Buffer(const void* vertex_data, GLsizei size, GLenum usage) : data_size(size) {
 		if (size <= 0 || !vertex_data)
 			throw std::invalid_argument("Invalid vertex_data or size");
-
 		glGenVertexArrays(1, &vao);
 		std::string err = checkError("Gen VAO");
 		if (!err.empty()) {
 			cleanupPartial();
 			throw std::runtime_error(err);
 		}
-
 		glBindVertexArray(vao);
 		err = checkError("Bind VAO");
 		if (!err.empty()) {
 			cleanupPartial();
 			throw std::runtime_error(err);
 		}
-
 		glGenBuffers(1, &vbo);
 		err = checkError("Gen VBO");
 		if (!err.empty()) {
 			cleanupPartial();
 			throw std::runtime_error(err);
 		}
-
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 		err = checkError("Bind VBO");
 		if (!err.empty()) {
 			cleanupPartial();
 			throw std::runtime_error(err);
 		}
-
 		glBufferData(GL_ARRAY_BUFFER, data_size, vertex_data, usage);
 		err = checkError("BufferData");
 		if (!err.empty()) {
 			cleanupPartial();
 			throw std::runtime_error(err);
 		}
-
 		is_initialized = true;
 		setVertexAttr();
 		unbind();
@@ -121,4 +115,4 @@ namespace lge {
 			is_initialized = false;
 		}
 	}
-}  // namespace lge
+}

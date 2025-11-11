@@ -1,159 +1,11 @@
-#pragma once
-
-#include <GL/glew.h>
-#include <string>
-
-namespace lge {
-	class Buffer {
-	private:
-		GLuint	vbo{0};
-		GLuint	vao{0};
-		GLsizei	data_size{0};
-		bool	is_initialized{false};
-
-	public:
-		Buffer(const void* vertex_data, GLsizei size, GLenum usage = GL_STATIC_DRAW);
-		~Buffer();
-
-		[[nodiscard]] std::string checkError(const std::string& context = "");
-		void bind() const;
-		void unbind() const;
-		Buffer(const Buffer&) = delete;
-		Buffer(Buffer&&) = delete;
-		Buffer& operator=(const Buffer&) = delete;
-		Buffer& operator=(const Buffer&&) = delete;
-	private:
-		void cleanupPartial();
-	};
-}
-#pragma once
-
-#include <SDL2/SDL.h>
-
-namespace lge {
-	constexpr size_t	DEFAULT_WIDTH = 800;
-	constexpr size_t	DEFAULT_HEIGHT = 600;
-	constexpr size_t	WINDOW_MARGIN_VERTICAL = 150;
-	constexpr size_t	WINDOW_MARGIN_HORIZONTAL = 200;
-
-	class Desktop {
-		private:
-			size_t			windowWidth{DEFAULT_WIDTH};
-			size_t			windowHeight{DEFAULT_HEIGHT};
-			bool			running{false};
-			SDL_Window*		window{nullptr};
-			SDL_GLContext	glContext{nullptr};
-
-			Desktop();
-			virtual ~Desktop();
-			Desktop(const Desktop&) = delete;
-			Desktop& operator=(const Desktop&) = delete;
-			Desktop(Desktop&&) = delete;
-			Desktop& operator=(Desktop&&) = delete;
-		public:
-			static Desktop	&getInstance();
-			size_t	getWindowHeight();
-			size_t	getWindowWidth();
-			void	setWindowHeight(unsigned int height);
-			void	setWindowWidth(unsigned int width);
-			void	initWindowParam();
-	};
-}
-#pragma once
-
-#include <vector>
-#include <string>
-#include <SDL2/SDL.h>
-#include <GL/glew.h>
-
-namespace lge {
-
-	using gridFile = std::vector<std::vector<std::string>>;
-
-	struct Coord3 {
-		float x = 0.0f;
-		float y = 0.0f;
-		float z = 0.0f;
-	};
-
-	struct Rgba {
-		float r = 0.0f;
-		float g = 0.0f;
-		float b = 0.0f;
-		float a = 0.0f;
-	};
-
-	struct Pixel {
-		Coord3		position;
-		Rgba		color;
-	};
-
-	class Map {
-		using gridPixels = std::vector<std::vector<Pixel>>;
-		private:
-			size_t		mapWidth {0};
-			size_t		mapHeight {0};
-			gridPixels	mapData;
-		private:
-			int			parseLine(const std::string &line, gridFile &mapContent);
-			int			convertToPixels(const gridFile &mapContent);
-			static bool	validColor(const std::string &strColor);
-			static bool	validNumber(const std::string &strNumber);
-			void		cellColor(Pixel &cell, const std::string &color);
-			void		addVertex(std::vector<float> &vertex, const Pixel &data) const;
-		private:
-			Map() = default;
-			Map(const Map &) = delete;
-			Map& operator=(const Map&) = delete;
-			Map(Map &&) = delete;
-			Map& operator=(Map &&) = delete;
-		public:
-
-			static Map&			getInstance();
-			int					parseFile(const std::string &filename);
-			size_t				getMapWidth() const;
-			size_t				getMapHeight() const;
-			static bool			verifyFile(const std::string &filename);
-			std::vector<float>	getMapVertexes() const;
-	};
-}
-#include <string>
-#include <GL/glew.h>
-#include <glm/glm.hpp>
-
-namespace lge {
-	typedef void (*InfoLogFunc)(GLuint, GLsizei, GLsizei*, GLchar*);
-	constexpr unsigned int MAX_INFO_LOG  = 512;
-
-	class Shader {
-		private:
-			unsigned int	programId {0};
-		private:
-			static void			checkShaderError(int success, unsigned int program, InfoLogFunc logInfo);
-			static std::string	readShaderFile(const char *path);
-			static unsigned int	createCompileShader(const char *code, GLenum type);
-			void				createShaderProgram(const char *vertexCode, const char *fragmentCode);
-		public:
-			Shader(const char *vertexPath, const char *fragmentPath);
-			~Shader();
-
-			unsigned int	getId() const;
-			void			use() const;
-			void			setBoolUniform(const std::string &name, bool value) const ;
-			void			setIntUniform(const std::string &name, int value) const;
-			void			setFloatUniform(const std::string &name, float value) const;
-			void			setVec3Uniform(const std::string &name, const glm::vec3 &value) const;
-			void			setVec4Uniform(const std::string &name, const glm::vec4 &value) const;
-			void			setMat4Uniform(const std::string &name, const glm::mat4 &value) const;
-	};
-}
 #include "../hdrs/Buffer.hpp"
 #include <GL/glew.h>
-#include <string>
-#include <stdexcept>
 #include <iostream>
+#include <stdexcept>
+#include <string>
 
 namespace lge {
+
 	void Buffer::bind() const {
 		if (is_initialized) {
 			glBindVertexArray(vao);
@@ -169,21 +21,21 @@ namespace lge {
 	}
 
 	std::string Buffer::checkError(const std::string& context) {
-		std::string full_context = context;
-		std::string first_error = "";
+		std::string first_error;
 		GLenum err;
-
 		while ((err = glGetError()) != GL_NO_ERROR) {
-			std::string err_str = full_context + ": OpenGL error ";
+			std::string err_str = context + ": OpenGL error ";
 			switch (err) {
-				case GL_INVALID_ENUM: err_str += " (GL_INVALID_ENUM)"; break;
-				case GL_INVALID_VALUE: err_str += " (GL_INVALID_VALUE)"; break;
-				case GL_INVALID_OPERATION: err_str += " (GL_INVALID_OPERATION)"; break;
-				case GL_OUT_OF_MEMORY: err_str += " (GL_OUT_OF_MEMORY)"; break;
-				default: err_str += " (Unknown)"; break;
+				case GL_INVALID_ENUM:        err_str += "(GL_INVALID_ENUM)"; break;
+				case GL_INVALID_VALUE:       err_str += "(GL_INVALID_VALUE)"; break;
+				case GL_INVALID_OPERATION:   err_str += "(GL_INVALID_OPERATION)"; break;
+				case GL_OUT_OF_MEMORY:       err_str += "(GL_OUT_OF_MEMORY)"; break;
+				default:                     err_str += "(Unknown)"; break;
 			}
 			std::cerr << err_str << std::endl;
-			if (first_error.empty()) first_error = err_str;
+			if (first_error.empty()) {
+				first_error = err_str;
+			}
 		}
 		return first_error;
 	}
@@ -198,9 +50,23 @@ namespace lge {
 			glDeleteBuffers(1, &vbo);
 			vbo = 0;
 		}
+		is_initialized = false;
 	}
 
-	Buffer::Buffer(const void* vertex_data, GLsizei size, GLenum usage = GL_STATIC_DRAW) : data_size(size) {
+	void Buffer::setVertexAttr() {
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float),
+							  (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+		std::string err = checkError("Vertex Attributes Setup");
+		if (!err.empty()) {
+			cleanupPartial();
+			throw std::runtime_error(err);
+		}
+	}
+
+	Buffer::Buffer(const void* vertex_data, GLsizei size, GLenum usage) : data_size(size) {
 		if (size <= 0 || !vertex_data)
 			throw std::invalid_argument("Invalid vertex_data or size");
 		glGenVertexArrays(1, &vao);
@@ -234,6 +100,7 @@ namespace lge {
 			throw std::runtime_error(err);
 		}
 		is_initialized = true;
+		setVertexAttr();
 		unbind();
 		err = checkError("Unbind in ctor");
 		if (!err.empty())
@@ -242,132 +109,83 @@ namespace lge {
 
 	Buffer::~Buffer() {
 		if (is_initialized) {
+			unbind();
 			glDeleteVertexArrays(1, &vao);
 			glDeleteBuffers(1, &vbo);
 			is_initialized = false;
 		}
 	}
-
-	
 }
-#include "../hdrs/Desktop.hpp"
-#include <stdexcept>
-#include <iostream>
-#include <vector>
-#include <algorithm>
+#include "../hdrs/Window.hpp"
+#include "../hdrs/Map.hpp"
+#include "../hdrs/Buffer.hpp"
+#include "../hdrs/Shader.hpp"
+#include <glm/gtc/matrix_transform.hpp>
 #include <GL/glew.h>
-#include "../hdrs/Map.hpp"
-
-namespace lge {
-	size_t Desktop::getWindowHeight() { return windowHeight; }
-
-	size_t Desktop::getWindowWidth() { return windowWidth; }
-
-	void Desktop::setWindowHeight(unsigned int height) { windowHeight = height; }
-
-	void Desktop::setWindowWidth(unsigned int width) { windowWidth = width; }
-
-	void Desktop::initWindowParam() {
-		SDL_DisplayMode dm;
-		if (SDL_GetCurrentDisplayMode(0, &dm) != 0)
-			return;
-		windowWidth = dm.w - WINDOW_MARGIN_HORIZONTAL;
-		windowHeight = dm.h - WINDOW_MARGIN_VERTICAL;
-	};
-
-	Desktop::Desktop() : windowWidth(DEFAULT_WIDTH), windowHeight(DEFAULT_HEIGHT), running(false) {
-		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0)
-			throw std::runtime_error(SDL_GetError());
-		initWindowParam();
-		window = SDL_CreateWindow("Line Engine",
-							  SDL_WINDOWPOS_CENTERED,
-							  SDL_WINDOWPOS_CENTERED,
-							  windowWidth,
-							  windowHeight,
-							  SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-
-		if (!window)
-			throw std::runtime_error(SDL_GetError());
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-		glContext = SDL_GL_CreateContext(window);
-		if (!glContext)
-			throw std::runtime_error(std::string("Failed to create OpenGL context: ") + SDL_GetError());
-		glewExperimental = GL_TRUE;
-		if (glewInit() != GLEW_OK)
-			throw std::runtime_error("Failed to initialize OpenGL functional");
-		glViewport(0, 0, windowWidth, windowHeight);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		if (SDL_GL_SetSwapInterval(1) < 0)
-			std::cerr << "Warning: Unable to set VSync: " << SDL_GetError() << std::endl;
-	}
-
-	Desktop::~Desktop() {
-		if (glContext)
-			SDL_GL_DeleteContext(glContext);
-		if (window)
-			SDL_DestroyWindow(window);
-		SDL_Quit();
-	}
-
-	Desktop &Desktop::getInstance() {
-		static Desktop instance;
-		return instance;
-	}
-}
-
-#include <iostream>
-#include <fstream>
-#include <filesystem>
-#include <cstdlib>
-#include "../hdrs/Map.hpp"
-#include "../hdrs/Desktop.hpp"
 #include <SDL2/SDL.h>
-#include <GL/glew.h>
+#include <cstdlib>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
 
 int main(int argc, const char *argv[]) {
 	if (argc != 2) {
-		std::cerr << "\033[31mProgram must have one argument with the .lge extension!\033[0m\n";
+		std::cerr << "\033[31mProgram must have one argument with the .lge "
+								 "extension!\033[0m\n";
 		return EXIT_FAILURE;
 	}
 	if (!lge::Map::verifyFile(std::string(argv[1])))
 		return EXIT_FAILURE;
 	lge::Map &lgeMap = lge::Map::getInstance();
-	lge::Desktop &lgeWindow = lge::Desktop::getInstance();
-	lgeMap.parseFile(argv[1]);
-	
+	lge::Window &lgeWindow = lge::Window::getInstance();
+	if (lgeMap.parseFile(argv[1]) != 0)
+		return EXIT_FAILURE;
+	std::vector<float> vertices = lgeMap.getMapVertexes();
+	const GLsizei vertexCount = static_cast<GLsizei>(vertices.size() / 7);
+	lge::Buffer lineBuffer(vertices.data(), static_cast<GLsizei>(vertices.size() * sizeof(float)));
+	std::cerr << "Map size (w x h): " << lgeMap.getMapWidth() << " x " << lgeMap.getMapHeight()
+						<< ", vertices: " << vertexCount << "\n";
+
+	lge::Shader shader("Shaders/vertex.glsl", "Shaders/fragment.glsl");
+	shader.use();
+
+ 	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_DEPTH_TEST);
+ 	glLineWidth(1.0f);
+
+	lgeWindow.startLoop();
+	while (lgeWindow.isRunning()) {
+		lgeWindow.pollEvents();
+		
+	}
+
 	return EXIT_SUCCESS;
 }
 #include "../hdrs/Map.hpp"
-#include <fstream>
-#include <iostream>
 #include <cctype>
-#include <sstream>
+#include <fstream>
 #include <iomanip>
-
+#include <iostream>
+#include <sstream>
 
 namespace lge {
-	size_t	Map::getMapHeight() const { return mapHeight; }
+	size_t Map::getMapHeight() const { return mapHeight; }
 
-	size_t	Map::getMapWidth() const { return mapWidth; }
+	size_t Map::getMapWidth() const { return mapWidth; }
 
 	void Map::addVertex(std::vector<float> &vertex, const Pixel &data) const {
-		vertex.insert(vertex.end(), {
-			data.position.x,
-			data.position.y,
-			data.position.z,
-			data.color.r / 255.0f,
-			data.color.g / 255.0f,
-			data.color.b / 255.0f,
-			data.color.a / 255.0f
-			}
-		);
+		vertex.insert(vertex.end(), {data.position.x,
+																data.position.y,
+																data.position.z,
+																data.color.r / 255.0f,
+																data.color.g / 255.0f,
+																data.color.b / 255.0f,
+																data.color.a / 255.0f});
 	}
 
-	std::vector<float>	Map::getMapVertexes() const {
-		std::vector<float>	vertexes;
-
+	std::vector<float> Map::getMapVertexes() const {
+		std::vector<float> vertexes;
 		for (size_t i = 0; i < mapHeight; ++i) {
 			for (size_t j = 0; j < mapWidth - 1; ++j) {
 				addVertex(vertexes, mapData[i][j]);
@@ -383,46 +201,48 @@ namespace lge {
 		return vertexes;
 	}
 
-	Map& Map::getInstance()
-	{
+	Map &Map::getInstance() {
 		static Map instance;
 		return instance;
 	}
-}
-
-
-
-
-
-
+} // namespace lge
+#include "../hdrs/Map.hpp"
+#include <fstream>
 #include <iostream>
 #include <sstream>
-#include <fstream>
-#include "../hdrs/Map.hpp"
 
 namespace lge {
-	void	Map::cellColor(Pixel &cell, const std::string &color) {
+
+	void Map::cellColor(Pixel &cell, const std::string &color) {
 		if (color.empty()) {
-			cell.color.r = 255.0f;
-			cell.color.g = 255.0f;
-			cell.color.b = 255.0f;
-			cell.color.a = 255.0f;
-			return ;
+			cell.color = {255.0f, 255.0f, 255.0f, 255.0f};
+				return;
 		}
-		unsigned int coloring = std::stoul(color, nullptr, 16);
-		cell.color.r = (coloring >> 16) & 0xFF;
-		cell.color.g = (coloring >> 8) & 0xFF;
-		cell.color.b = coloring & 0xFF;
-		if (color.length() == 4 || color.length() == 8)
-			cell.color.a = (coloring >> 24) & 0xFF;
+		std::string hex = color;
+		if (hex.find("0x", 0) == 0 || hex.find("0X", 0) == 0)
+			hex = hex.substr(2);
+		if (hex.length() == 3 || hex.length() == 4) {
+				std::string h;
+				for (char c : hex) h += std::string(2, c);
+				hex = h;
+		}
+		unsigned int val = std::stoul(hex, nullptr, 16);
+		if (hex.length() == 6) {
+				cell.color.r = static_cast<float>((val >> 16) & 0xFF);
+				cell.color.g = static_cast<float>((val >> 8) & 0xFF);
+				cell.color.b = static_cast<float>(val & 0xFF);
+		} else {
+				cell.color.r = static_cast<float>((val >> 24) & 0xFF);
+				cell.color.g = static_cast<float>((val >> 16) & 0xFF);
+				cell.color.b = static_cast<float>((val >> 8)  & 0xFF);
+				cell.color.a = static_cast<float>(val & 0xFF);
+		}
 	}
 
-	int	Map::convertToPixels(const gridFile &mapContent)
-	{
+	int Map::convertToPixels(const gridFile &mapContent) {
 		mapData.resize(mapHeight);
 		for (auto &row : mapData)
-		row.resize(mapWidth);
-
+			row.resize(mapWidth);
 		for (size_t i = 0; i < mapHeight; ++i) {
 			for (size_t j = 0; j < mapWidth; ++j) {
 				std::string zAxis, color;
@@ -437,21 +257,20 @@ namespace lge {
 					return -1;
 				if (!validColor(color))
 					return -1;
-				mapData[i][j].position.x = j;
-				mapData[i][j].position.y = i;
-				mapData[i][j].position.z = std::stoi(zAxis);
-				cellColor(mapData[i][j], color.substr(1));
+				mapData[i][j].position.x = static_cast<float> (j);
+				mapData[i][j].position.y = static_cast<float> (i);
+				mapData[i][j].position.z = static_cast<float> (std::stoi(zAxis));
+				cellColor(mapData[i][j], color.empty() ? std::string() : color.substr(1));
 			}
 		}
 		return 0;
 	}
 
 	int Map::parseLine(const std::string &line, gridFile &mapContent) {
-		std::istringstream			lineStream(line);
-		std::string					cell;
-		size_t						widthEach = 0;
-		std::vector<std::string>	row;
-
+		std::istringstream lineStream(line);
+		std::string cell;
+		size_t widthEach = 0;
+		std::vector<std::string> row;
 		while (lineStream >> cell) {
 			row.push_back(cell);
 			++widthEach;
@@ -462,15 +281,19 @@ namespace lge {
 		}
 		mapContent.push_back(row);
 		++mapHeight;
-		if (widthEach > mapWidth)
+		if (mapHeight == 1) {
 			mapWidth = widthEach;
+		} else if (widthEach != mapWidth) {
+			std::cerr << "Error: map rows must have equal width\n";
+			return -1;
+		}
 		return 0;
 	}
 
-	int	Map::parseFile(const std::string &filename) {
-		std::ifstream	file(filename);
-		std::string		line;
-		gridFile		mapContent;
+	int Map::parseFile(const std::string &filename) {
+		std::ifstream file(filename);
+		std::string line;
+		gridFile mapContent;
 
 		if (file.is_open()) {
 			while (std::getline(file, line)) {
@@ -481,36 +304,33 @@ namespace lge {
 				std::cerr << "Error reading file\n";
 				return -1;
 			}
-		}
-		else {
+		} else {
 			std::cerr << "Error opening file\n";
 			return -1;
 		}
 		convertToPixels(mapContent);
 		return 0;
 	};
-}
-
-
-#include "Shader.hpp"
+} // namespace lge
+#include "../hdrs/Shader.hpp"
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
 
 namespace lge {
-	std::string Shader::readShaderFile(const char *path)
-	{
+	std::string Shader::readShaderFile(const char *path) {
 		std::ifstream shaderFile(path);
 		if (!shaderFile.is_open())
-			throw std::runtime_error(std::string("Failed to open shader file: ") + path);
+			throw std::runtime_error(std::string("Failed to open shader file: ") +
+															 path);
 
 		std::stringstream shaderStream;
 		shaderStream << shaderFile.rdbuf();
 		return shaderStream.str();
 	}
 
-
-	void	Shader::checkShaderError(int success, unsigned int program, InfoLogFunc logInfo) {
+	void Shader::checkShaderError(int success, unsigned int program,
+																InfoLogFunc logInfo) {
 		char info[MAX_INFO_LOG];
 
 		if (!success) {
@@ -519,7 +339,7 @@ namespace lge {
 		}
 	}
 
-	unsigned int	Shader::createCompileShader(const char *code, GLenum type) {
+	unsigned int Shader::createCompileShader(const char *code, GLenum type) {
 		int success;
 		unsigned int shader;
 
@@ -531,7 +351,7 @@ namespace lge {
 		return shader;
 	}
 
-	void	Shader::createShaderProgram(const char *vertexCode, const char *fragmentCode) {
+	void Shader::createShaderProgram(const char *vertexCode, const char *fragmentCode) {
 		unsigned int vertex, fragment;
 		int success;
 
@@ -543,14 +363,23 @@ namespace lge {
 		glLinkProgram(programId);
 		glGetProgramiv(programId, GL_LINK_STATUS, &success);
 		checkShaderError(success, programId, glGetProgramInfoLog);
+
+		glValidateProgram(programId);
+		glGetProgramiv(programId, GL_VALIDATE_STATUS, &success);
+		checkShaderError(success, programId, glGetProgramInfoLog);
+
+		glDetachShader(programId, vertex);
+		glDetachShader(programId, fragment);
+		glDeleteShader(vertex);
+		glDeleteShader(fragment);
 	}
 
 	Shader::Shader(const char *vertexPath, const char *fragmentPath) {
 		std::string vertexStr = readShaderFile(vertexPath);
 		std::string fragmentStr = readShaderFile(fragmentPath);
-			
-		const GLchar* vertexCode = vertexStr.c_str();
-		const GLchar* fragmentCode = fragmentStr.c_str();
+
+		const GLchar *vertexCode = vertexStr.c_str();
+		const GLchar *fragmentCode = fragmentStr.c_str();
 		createShaderProgram(vertexCode, fragmentCode);
 	}
 
@@ -559,12 +388,12 @@ namespace lge {
 			glDeleteProgram(programId);
 	}
 
-	unsigned int Shader::getId() const{ return programId; }
+	unsigned int Shader::getId() const { return programId; }
 
-	void	Shader::use() const { glUseProgram(programId); }
+	void Shader::use() const { glUseProgram(programId); }
 
-	void	Shader::setBoolUniform(const std::string &name, bool value) const {
-		glUniform1i(glGetUniformLocation(programId, name.c_str()), (int) value);
+	void Shader::setBoolUniform(const std::string &name, bool value) const {
+		glUniform1i(glGetUniformLocation(programId, name.c_str()), (int)value);
 	}
 
 	void Shader::setFloatUniform(const std::string &name, float value) const {
@@ -575,27 +404,36 @@ namespace lge {
 		glUniform1i(glGetUniformLocation(programId, name.c_str()), value);
 	}
 
-	void Shader::setVec3Uniform(const std::string &name, const glm::vec3 &value) const {
+	void Shader::setVec3Uniform(const std::string &name,
+															const glm::vec3 &value) const {
 		glUniform3fv(glGetUniformLocation(programId, name.c_str()), 1, &value[0]);
 	}
 
-	void Shader::setVec4Uniform(const std::string &name, const glm::vec4 &value) const {
+	void Shader::setVec4Uniform(const std::string &name,
+															const glm::vec4 &value) const {
 		glUniform4fv(glGetUniformLocation(programId, name.c_str()), 1, &value[0]);
 	}
 
-	void Shader::setMat4Uniform(const std::string &name, const glm::mat4 &value) const {
-		glUniformMatrix4fv(glGetUniformLocation(programId, name.c_str()), 1, GL_FALSE, &value[0][0]);
+	void Shader::setMat4Uniform(const std::string &name,
+															const glm::mat4 &value) const {
+		glUniformMatrix4fv(glGetUniformLocation(programId, name.c_str()), 1, GL_FALSE,
+											 &value[0][0]);
 	}
-}
+
+	void Shader::setVec2Uniform(const std::string &name,
+															const glm::vec2 &value) const {
+		glUniform2fv(glGetUniformLocation(programId, name.c_str()), 1, &value[0]);
+	}
+} // namespace lge
+#include "../hdrs/Map.hpp"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include "../hdrs/Map.hpp"
 
 namespace lge {
 
-	bool	Map::verifyFile(const std::string &filename) {
-		std::filesystem::path filePath = "./" + filename;
+	bool Map::verifyFile(const std::string &filename) {
+		std::filesystem::path filePath = filename;
 		if (!std::filesystem::exists(filePath)) {
 			std::cerr << "\033[31mError: File doesn't exist\033[0m\n";
 			return false;
@@ -612,14 +450,14 @@ namespace lge {
 		return true;
 	}
 
-	bool	Map::validNumber(const std::string &strNumber) {
+	bool Map::validNumber(const std::string &strNumber) {
 		if (strNumber.empty())
 			return false;
 		if (strNumber.length() == 1 && strNumber[0] == '0')
 			return true;
 		if (strNumber[0] == '0')
 			return false;
-		if (strNumber.length() > 4)
+		if (strNumber.length() > 3)
 			return false;
 		for (char c : strNumber) {
 			if (!std::isdigit(static_cast<unsigned char>(c)))
@@ -628,9 +466,8 @@ namespace lge {
 		return true;
 	}
 
-	bool	Map::validColor(const std::string &strColor) {
+	bool Map::validColor(const std::string &strColor) {
 		size_t i = 1;
-
 		if (strColor.empty())
 			return true;
 		if (strColor.length() != 6 && strColor.length() != 7
@@ -645,6 +482,123 @@ namespace lge {
 		}
 		return true;
 	}
+} // namespace lge
+#include "../hdrs/Window.hpp"
+#include <GL/glew.h>
+#include <algorithm>
+#include <iostream>
+#include <stdexcept>
+#include <vector>
+
+namespace lge {
+
+	size_t Window::getWindowHeight() const { return windowHeight; }
+
+	size_t Window::getWindowWidth() const { return windowWidth; }
+
+	void Window::setWindowHeight(unsigned int height) { windowHeight = height; }
+
+	void Window::setWindowWidth(unsigned int width) { windowWidth = width; }
+
+	void Window::startLoop() { running = true; }
+
+	bool Window::isRunning() const { return running; }
+
+	void Window::swapBuffers() {
+		if (window)
+			SDL_GL_SwapWindow(window);
+	}
+
+	void Window::initWindowParam() {
+		SDL_DisplayMode dm;
+		if (SDL_GetCurrentDisplayMode(0, &dm) != 0)
+			return;
+		windowHeight = windowWidth == std::min(dm.w, dm.h) * WINDOW_MARGIN;
+	}
+
+	void Window::checkSdlError(const std::string& context) {
+		const char* err = SDL_GetError();
+		if (*err != '\0') {
+			std::string msg = context + ": SDL error - " + err;
+			SDL_ClearError();
+			throw std::runtime_error(msg);
+		}
+	}
+
+	Window::Window() : windowWidth(DEFAULT_WIDTH), windowHeight(DEFAULT_HEIGHT), running(false) {
+		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0)
+			throw std::runtime_error("SDL_Init failed: " + std::string(SDL_GetError()));
+		initWindowParam();
+		window = SDL_CreateWindow("Line Engine",
+								  SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+								  static_cast<int>(windowWidth),
+								  static_cast<int>(windowHeight),
+								  SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+		checkSdlError("Create Window");
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, GL_MAJOR);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, GL_MINOR);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+		glContext = SDL_GL_CreateContext(window);
+		checkSdlError("Create GL Context");
+		glewExperimental = GL_TRUE;
+		if (glewInit() != GLEW_OK)
+			throw std::runtime_error("Failed to initialize OpenGL functionality");
+		glViewport(0, 0, static_cast<GLsizei>(windowWidth), static_cast<GLsizei>(windowHeight));
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		if (SDL_GL_SetSwapInterval(1) < 0)
+			std::cerr << "Warning: Unable to set VSync: " << SDL_GetError() << std::endl;
+	}
+
+	Window::~Window() {
+		if (glContext)
+			SDL_GL_DeleteContext(glContext);
+		if (window)
+			SDL_DestroyWindow(window);
+		SDL_Quit();
+	}
+
+	Window& Window::getInstance() {
+		static Window instance;
+		return instance;
+	}
+
+	void Window::pollEvents() {
+		SDL_Event e;
+		while (SDL_PollEvent(&e)) {
+			if (e.type == SDL_QUIT)
+				running = false;
+		}
+	}
+
+	void Window::render() {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// TODO: User draw calls (e.g., buffer.bind(); glDrawArrays(...))
+	}
+
+}  // namespace lge
+#version 330 core
+in vec4 vertexColor;
+out vec4 FragColor;
+void main() { FragColor = vertexColor; }
+#version 330 core
+layout(location = 0) in vec3 aPos;
+layout(location = 1) in vec4 aColor;
+out vec4 vertexColor;
+
+uniform float windowHeight;
+uniform float windowWidth;
+uniform float gridHeight;
+uniform float gridWidth;
+
+
+void main() {
+
+    float zoomY = windowHeight / gridHeight * 0.8f;
+    float zoomX = windowWidth / gridWidth * 0.8f;
+
+    float ndcX = (zoomX * aPos.x / windowWidth) * 2.0f - 1.0f;
+    float ndcY = 1 - (zoomY * aPos.y / windowHeight) * 2.0f;
+
+    gl_Position = vec4(ndcX, ndcY, 0, 1.0);
+    vertexColor = aColor;
 }
-
-
