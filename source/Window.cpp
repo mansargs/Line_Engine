@@ -1,4 +1,6 @@
 #include "../hdrs/Window.hpp"
+#include "../hdrs/Shader.hpp"
+#include "../hdrs/Buffer.hpp"
 #include <GL/glew.h>
 #include <algorithm>
 #include <iostream>
@@ -24,7 +26,7 @@ namespace lge {
 			SDL_GL_SwapWindow(window);
 	}
 
-	void Window::initWindowParam() {
+	void Window::setWindowByDisplay() {
 		SDL_DisplayMode dm;
 		if (SDL_GetCurrentDisplayMode(0, &dm) != 0)
 			return;
@@ -40,15 +42,17 @@ namespace lge {
 		}
 	}
 
-	Window::Window() : windowWidth(DEFAULT_WIDTH), windowHeight(DEFAULT_HEIGHT), running(false) {
+	Window::Window() {
 		if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0)
 			throw std::runtime_error("SDL_Init failed: " + std::string(SDL_GetError()));
-		initWindowParam();
+		setWindowByDisplay();
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+    	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 		window = SDL_CreateWindow("Line Engine",
-								  SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-								  static_cast<int>(windowWidth),
-								  static_cast<int>(windowHeight),
-								  SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+								SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+								static_cast<int>(windowWidth),
+								static_cast<int>(windowHeight),
+								SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 		checkSdlError("Create Window");
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, GL_MAJOR);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, GL_MINOR);
@@ -58,6 +62,7 @@ namespace lge {
 		glewExperimental = GL_TRUE;
 		if (glewInit() != GLEW_OK)
 			throw std::runtime_error("Failed to initialize OpenGL functionality");
+		glEnable(GL_MULTISAMPLE);
 		glViewport(0, 0, static_cast<GLsizei>(windowWidth), static_cast<GLsizei>(windowHeight));
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		if (SDL_GL_SetSwapInterval(1) < 0)
@@ -85,9 +90,25 @@ namespace lge {
 		}
 	}
 
-	void Window::render() {
+	void Window::render(const Shader &shader, const Buffer &lineBuffer,
+													GLsizei vertexCount) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		// TODO: User draw calls (e.g., buffer.bind(); glDrawArrays(...))
+		std::string err = Buffer::checkError("Post-Clear");
+		if (!err.empty())
+			std::cerr << "Clear Error: " << err << std::endl;
+		shader.use();
+		err = Buffer::checkError("Shader Use");
+		if (!err.empty())
+			std::cerr << "Shader Error: " << err << std::endl;
+		lineBuffer.bind();
+		err = lge::Buffer::checkError("Buffer Bind");
+		if (!err.empty())
+			std::cerr << "Bind Error: " << err << std::endl;
+		glDrawArrays(GL_LINES, 0, vertexCount);
+		err = lge::Buffer::checkError("DrawArrays");
+		if (!err.empty())
+			std::cerr << "Draw Error: " << err << std::endl;
+		lineBuffer.unbind();
 	}
 
 }  // namespace lge

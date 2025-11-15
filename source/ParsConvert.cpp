@@ -4,50 +4,20 @@
 #include <sstream>
 
 namespace lge {
-
 	void Map::cellColor(Pixel &cell, const std::string &color) {
 		if (color.empty()) {
 			if (cell.position.z < 0)
-				cell.color = {0.0f, 0.0f, 255.0f, 255.0f};
+				cell.color = {0.0f, 0.0f, 255.0f};
 			else if (cell.position.z > 0)
-				cell.color = {255.0f, 0.0f, 0.0f, 255.0f};
+				cell.color = {255.0f, 0.0f, 0.0f};
 			else
-				cell.color = {255.0f, 255.0f, 255.0f, 255.0f};
+				cell.color = {255.0f, 255.0f, 0.0f};
 			return;
 		}
-		std::string hex = color;
-		if (hex.empty())
-			return;
-		if (hex.rfind("0x", 0) == 0 || hex.rfind("0X", 0) == 0)
-			hex = hex.substr(2);
-		if (hex.length() == 3) {
-				std::string expanded;
-				for (char c : hex) {
-					expanded.push_back(c);
-					expanded.push_back(c);
-				}
-				hex = expanded;
-		}
-		auto padLeft = [](const std::string &value, std::size_t target) {
-				if (value.length() >= target)
-					return value;
-				return std::string(target - value.length(), '0') + value;
-		};
-		std::string normalized = hex.length() <= 6 ? padLeft(hex, 6) : padLeft(hex, 8);
-		unsigned int val = std::stoul(normalized, nullptr, 16);
-		if (normalized.length() == 6) {
-				cell.color.r = static_cast<float>((val >> 16) & 0xFF);
-				cell.color.g = static_cast<float>((val >> 8) & 0xFF);
-				cell.color.b = static_cast<float>(val & 0xFF);
-				cell.color.a = 255.0f;
-		} else {
-				cell.color.r = static_cast<float>((val >> 24) & 0xFF);
-				cell.color.g = static_cast<float>((val >> 16) & 0xFF);
-				cell.color.b = static_cast<float>((val >> 8)  & 0xFF);
-				cell.color.a = static_cast<float>(val & 0xFF);
-				if (cell.color.a == 0.0f)
-					cell.color.a = 255.0f;
-		}
+		unsigned int colorValue = std::stoul(color, nullptr, 0);
+		cell.color.r = static_cast<float>((colorValue >> 16) & 0xFF);
+		cell.color.g = static_cast<float>((colorValue >> 8) & 0xFF);
+		cell.color.b = static_cast<float>(colorValue & 0xFF);
 	}
 
 	int Map::convertToPixels(const gridFile &mapContent) {
@@ -62,7 +32,7 @@ namespace lge {
 					zAxis = mapContent[i][j];
 				else {
 					zAxis = mapContent[i][j].substr(0, found);
-					color = mapContent[i][j].substr(found);
+					color = mapContent[i][j].substr(found + 1);
 				}
 				if (!validNumber(zAxis))
 					return -1;
@@ -71,7 +41,11 @@ namespace lge {
 				mapData[i][j].position.x = static_cast<float> (j);
 				mapData[i][j].position.y = static_cast<float> (i);
 				mapData[i][j].position.z = static_cast<float> (std::stoi(zAxis));
-				cellColor(mapData[i][j], color.empty() ? std::string() : color.substr(1));
+				if (mapData[i][j].position.z > maxZ)
+					maxZ = mapData[i][j].position.z;
+				else if (mapData[i][j].position.z < minZ)
+					minZ = mapData[i][j].position.z;
+				cellColor(mapData[i][j], color);
 			}
 		}
 		return 0;

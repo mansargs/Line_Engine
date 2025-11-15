@@ -1,6 +1,11 @@
 #pragma once
+
 #include <SDL2/SDL.h>
 #include <string>
+#include "../hdrs/Shader.hpp"
+#include "../hdrs/Buffer.hpp"
+#include "../hdrs/Window.hpp"
+#include "../hdrs/Map.hpp"
 
 namespace lge {
 	constexpr size_t DEFAULT_WIDTH = 700;
@@ -30,9 +35,9 @@ namespace lge {
 			size_t getWindowWidth() const;
 			void setWindowHeight(unsigned int height);
 			void setWindowWidth(unsigned int width);
-			void initWindowParam();
+			void setWindowByDisplay();
 			void pollEvents();
-			void render();
+			void render(const Shader &shader, const Buffer &lineBuffer, GLsizei vertexCount);
 			bool isRunning() const;
 			void startLoop();
 			void swapBuffers();

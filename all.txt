@@ -138,6 +138,8 @@ int main(int argc, const char *argv[]) {
 		return EXIT_FAILURE;
 	lge::Map &lgeMap = lge::Map::getInstance();
 	lge::Window &lgeWindow = lge::Window::getInstance();
+	std::cout << " height --->  " << lgeWindow.getWindowHeight() << " \nWidth ----->   "
+				<< lgeWindow.getWindowWidth() << std::endl;
 	if (lgeMap.parseFile(argv[1]) != 0)
 		return EXIT_FAILURE;
 	std::vector<float> vertices = lgeMap.getMapVertexes();
@@ -148,6 +150,10 @@ int main(int argc, const char *argv[]) {
 
 	lge::Shader shader("Shaders/vertex.glsl", "Shaders/fragment.glsl");
 	shader.use();
+	shader.setFloatUniform("windowHeight", static_cast<float>(lgeWindow.getWindowHeight()));
+	shader.setFloatUniform("windowWidth", static_cast<float>(lgeWindow.getWindowWidth()));
+	shader.setFloatUniform("gridHeight", static_cast<float>(lgeMap.getMapHeight()));
+	shader.setFloatUniform("gridWidth", static_cast<float>(lgeMap.getMapWidth()));
 
  	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -157,7 +163,25 @@ int main(int argc, const char *argv[]) {
 	lgeWindow.startLoop();
 	while (lgeWindow.isRunning()) {
 		lgeWindow.pollEvents();
-		
+
+    glClear(GL_COLOR_BUFFER_BIT);
+    std::string err = lge::Buffer::checkError("Post-Clear");  // Add this
+    if (!err.empty()) std::cerr << "Clear Error: " << err << std::endl;
+
+    shader.use();
+    err = lge::Buffer::checkError("Shader Use");
+    if (!err.empty()) std::cerr << "Shader Error: " << err << std::endl;
+
+    lineBuffer.bind();
+    err = lge::Buffer::checkError("Buffer Bind");
+    if (!err.empty()) std::cerr << "Bind Error: " << err << std::endl;
+
+    glDrawArrays(GL_LINES, 0, vertexCount);  // Use your pre-computed vertexCount
+    err = lge::Buffer::checkError("DrawArrays");
+    if (!err.empty()) std::cerr << "Draw Error: " << err << std::endl;
+
+    lineBuffer.unbind();
+    lgeWindow.swapBuffers();
 	}
 
 	return EXIT_SUCCESS;
@@ -215,27 +239,46 @@ namespace lge {
 
 	void Map::cellColor(Pixel &cell, const std::string &color) {
 		if (color.empty()) {
-			cell.color = {255.0f, 255.0f, 255.0f, 255.0f};
-				return;
+			if (cell.position.z < 0)
+				cell.color = {0.0f, 0.0f, 255.0f, 255.0f};
+			else if (cell.position.z > 0)
+				cell.color = {255.0f, 0.0f, 0.0f, 255.0f};
+			else
+				cell.color = {255.0f, 255.0f, 255.0f, 255.0f};
+			return;
 		}
 		std::string hex = color;
-		if (hex.find("0x", 0) == 0 || hex.find("0X", 0) == 0)
+		if (hex.empty())
+			return;
+		if (hex.rfind("0x", 0) == 0 || hex.rfind("0X", 0) == 0)
 			hex = hex.substr(2);
-		if (hex.length() == 3 || hex.length() == 4) {
-				std::string h;
-				for (char c : hex) h += std::string(2, c);
-				hex = h;
+		if (hex.length() == 3) {
+				std::string expanded;
+				for (char c : hex) {
+					expanded.push_back(c);
+					expanded.push_back(c);
+				}
+				hex = expanded;
 		}
-		unsigned int val = std::stoul(hex, nullptr, 16);
-		if (hex.length() == 6) {
+		auto padLeft = [](const std::string &value, std::size_t target) {
+				if (value.length() >= target)
+					return value;
+				return std::string(target - value.length(), '0') + value;
+		};
+		std::string normalized = hex.length() <= 6 ? padLeft(hex, 6) : padLeft(hex, 8);
+		unsigned int val = std::stoul(normalized, nullptr, 16);
+		if (normalized.length() == 6) {
 				cell.color.r = static_cast<float>((val >> 16) & 0xFF);
 				cell.color.g = static_cast<float>((val >> 8) & 0xFF);
 				cell.color.b = static_cast<float>(val & 0xFF);
+				cell.color.a = 255.0f;
 		} else {
 				cell.color.r = static_cast<float>((val >> 24) & 0xFF);
 				cell.color.g = static_cast<float>((val >> 16) & 0xFF);
 				cell.color.b = static_cast<float>((val >> 8)  & 0xFF);
 				cell.color.a = static_cast<float>(val & 0xFF);
+				if (cell.color.a == 0.0f)
+					cell.color.a = 255.0f;
 		}
 	}
 
@@ -513,7 +556,7 @@ namespace lge {
 		SDL_DisplayMode dm;
 		if (SDL_GetCurrentDisplayMode(0, &dm) != 0)
 			return;
-		windowHeight = windowWidth == std::min(dm.w, dm.h) * WINDOW_MARGIN;
+		windowHeight = windowWidth = std::min(dm.w, dm.h) * WINDOW_MARGIN;
 	}
 
 	void Window::checkSdlError(const std::string& context) {
@@ -584,21 +627,22 @@ void main() { FragColor = vertexColor; }
 layout(location = 0) in vec3 aPos;
 layout(location = 1) in vec4 aColor;
 out vec4 vertexColor;
-
 uniform float windowHeight;
 uniform float windowWidth;
 uniform float gridHeight;
 uniform float gridWidth;
-
-
 void main() {
-
-    float zoomY = windowHeight / gridHeight * 0.8f;
-    float zoomX = windowWidth / gridWidth * 0.8f;
-
-    float ndcX = (zoomX * aPos.x / windowWidth) * 2.0f - 1.0f;
-    float ndcY = 1 - (zoomY * aPos.y / windowHeight) * 2.0f;
-
-    gl_Position = vec4(ndcX, ndcY, 0, 1.0);
+    float cos30 = 0.866f;
+    float sin30 = 0.5f;
+    float scale = 18.86f;
+    float offsetX = 226.17f;
+    float offsetY = 65.20f;
+    float projX = aPos.x * cos30 - aPos.z / 40 * sin30;
+    float projY = aPos.y + aPos.x * sin30 + aPos.z / 40 * cos30;
+    float screenX = scale * projX + offsetX;
+    float screenY = scale * projY + offsetY;
+    float ndcX = (2.0f * screenX / windowWidth) - 1.0f;
+    float ndcY = 1.0f - (2.0f * screenY / windowHeight);
+    gl_Position = vec4(ndcX, ndcY, 0.0f, 1.0f);
     vertexColor = aColor;
 }

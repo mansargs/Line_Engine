@@ -10,14 +10,20 @@ namespace lge {
 
 	size_t Map::getMapWidth() const { return mapWidth; }
 
+	float Map::getMaxZ() const { return maxZ; }
+
+	float Map::getMinZ() const { return minZ; }
+	
 	void Map::addVertex(std::vector<float> &vertex, const Pixel &data) const {
-		vertex.insert(vertex.end(), {data.position.x,
-																data.position.y,
-																data.position.z,
-																data.color.r / 255.0f,
-																data.color.g / 255.0f,
-																data.color.b / 255.0f,
-																data.color.a / 255.0f});
+		vertex.insert(vertex.end(), {
+					data.position.x,
+					data.position.y,
+					data.position.z,
+					data.color.r / 255.0f,
+					data.color.g / 255.0f,
+					data.color.b / 255.0f,
+					1.0f
+		});
 	}
 
 	std::vector<float> Map::getMapVertexes() const {

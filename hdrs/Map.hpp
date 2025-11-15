@@ -19,7 +19,6 @@ namespace lge {
 		float r = 0.0f;
 		float g = 0.0f;
 		float b = 0.0f;
-		float a = 255.0f;
 	};
 
 	struct Pixel {
@@ -33,6 +32,8 @@ namespace lge {
 		private:
 			size_t mapWidth{0};
 			size_t mapHeight{0};
+			float maxZ{0.0f};
+			float minZ{0.0f};
 			gridPixels mapData;
 		private:
 			int parseLine(const std::string &line, gridFile &mapContent);
@@ -52,6 +53,8 @@ namespace lge {
 			int parseFile(const std::string &filename);
 			size_t getMapWidth() const;
 			size_t getMapHeight() const;
+			float getMaxZ() const;
+			float getMinZ() const;
 			static bool verifyFile(const std::string &filename);
 			std::vector<float> getMapVertexes() const;
 	};

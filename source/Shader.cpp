@@ -7,16 +7,13 @@ namespace lge {
 	std::string Shader::readShaderFile(const char *path) {
 		std::ifstream shaderFile(path);
 		if (!shaderFile.is_open())
-			throw std::runtime_error(std::string("Failed to open shader file: ") +
-															 path);
-
+			throw std::runtime_error(std::string("Failed to open shader file: ") + path);
 		std::stringstream shaderStream;
 		shaderStream << shaderFile.rdbuf();
 		return shaderStream.str();
 	}
 
-	void Shader::checkShaderError(int success, unsigned int program,
-																InfoLogFunc logInfo) {
+	void Shader::checkShaderError(int success, unsigned int program, InfoLogFunc logInfo) {
 		char info[MAX_INFO_LOG];
 
 		if (!success) {
@@ -49,11 +46,9 @@ namespace lge {
 		glLinkProgram(programId);
 		glGetProgramiv(programId, GL_LINK_STATUS, &success);
 		checkShaderError(success, programId, glGetProgramInfoLog);
-
 		glValidateProgram(programId);
 		glGetProgramiv(programId, GL_VALIDATE_STATUS, &success);
 		checkShaderError(success, programId, glGetProgramInfoLog);
-
 		glDetachShader(programId, vertex);
 		glDetachShader(programId, fragment);
 		glDeleteShader(vertex);
@@ -90,24 +85,20 @@ namespace lge {
 		glUniform1i(glGetUniformLocation(programId, name.c_str()), value);
 	}
 
-	void Shader::setVec3Uniform(const std::string &name,
-															const glm::vec3 &value) const {
+	void Shader::setVec3Uniform(const std::string &name, const glm::vec3 &value) const {
 		glUniform3fv(glGetUniformLocation(programId, name.c_str()), 1, &value[0]);
 	}
 
-	void Shader::setVec4Uniform(const std::string &name,
-															const glm::vec4 &value) const {
+	void Shader::setVec4Uniform(const std::string &name, const glm::vec4 &value) const {
 		glUniform4fv(glGetUniformLocation(programId, name.c_str()), 1, &value[0]);
 	}
 
-	void Shader::setMat4Uniform(const std::string &name,
-															const glm::mat4 &value) const {
+	void Shader::setMat4Uniform(const std::string &name, const glm::mat4 &value) const {
 		glUniformMatrix4fv(glGetUniformLocation(programId, name.c_str()), 1, GL_FALSE,
 											 &value[0][0]);
 	}
 
-	void Shader::setVec2Uniform(const std::string &name,
-															const glm::vec2 &value) const {
+	void Shader::setVec2Uniform(const std::string &name, const glm::vec2 &value) const {
 		glUniform2fv(glGetUniformLocation(programId, name.c_str()), 1, &value[0]);
 	}
 } // namespace lge
