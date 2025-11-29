@@ -6,6 +6,7 @@
 #include "../hdrs/Buffer.hpp"
 #include "../hdrs/Window.hpp"
 #include "../hdrs/Map.hpp"
+#include "../hdrs/RenderConfig.hpp"
 
 namespace lge {
 	constexpr size_t DEFAULT_WIDTH = 700;
@@ -29,6 +30,7 @@ namespace lge {
 			Window(Window&&) = delete;
 			Window& operator=(Window&&) = delete;
 		public:
+			renderConfig Config;
 			~Window();
 			static Window& getInstance();
 			size_t getWindowHeight() const;

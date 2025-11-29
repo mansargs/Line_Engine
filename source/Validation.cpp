@@ -26,14 +26,20 @@ namespace lge {
 	bool Map::validNumber(const std::string &strNumber) {
 		if (strNumber.empty())
 			return false;
-		if (strNumber.length() == 1 && strNumber[0] == '0')
+		size_t startIdx = 0;
+		if (strNumber[0] == '-') {
+			if (strNumber.length() == 1)
+				return false;
+			startIdx = 1;
+		}
+		if (strNumber.length() == startIdx + 1 && strNumber[startIdx] == '0')
 			return true;
-		if (strNumber[0] == '0')
+		if (strNumber[startIdx] == '0' && strNumber.length() > startIdx + 1)
 			return false;
-		if (strNumber.length() > 4)
+		if (strNumber.length() - startIdx > 5)
 			return false;
-		for (char c : strNumber) {
-			if (!std::isdigit(static_cast<unsigned char>(c)))
+		for (size_t i = startIdx; i < strNumber.length(); ++i) {
+			if (!std::isdigit(static_cast<unsigned char>(strNumber[i])))
 				return false;
 		}
 		return true;

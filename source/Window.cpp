@@ -47,7 +47,7 @@ namespace lge {
 			throw std::runtime_error("SDL_Init failed: " + std::string(SDL_GetError()));
 		setWindowByDisplay();
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-    	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 5);
 		window = SDL_CreateWindow("Line Engine",
 								SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 								static_cast<int>(windowWidth),
@@ -65,8 +65,8 @@ namespace lge {
 		glEnable(GL_MULTISAMPLE);
 		glViewport(0, 0, static_cast<GLsizei>(windowWidth), static_cast<GLsizei>(windowHeight));
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		if (SDL_GL_SetSwapInterval(1) < 0)
-			std::cerr << "Warning: Unable to set VSync: " << SDL_GetError() << std::endl;
+			if (SDL_GL_SetSwapInterval(1) < 0)
+				std::cerr << "Warning: Unable to set VSync: " << SDL_GetError() << std::endl;
 	}
 
 	Window::~Window() {
@@ -87,6 +87,22 @@ namespace lge {
 		while (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT)
 				running = false;
+			else if (e.type == SDL_KEYDOWN) {
+				if (e.key.keysym.sym == SDLK_ESCAPE)
+					running = false;
+				else if (e.key.keysym.sym == SDLK_i)
+					Config.setIsometric(true);
+				else if (e.key.keysym.sym == SDLK_t)
+					Config.setTopView(true);
+				else if (e.key.keysym.sym == SDLK_UP)
+					Config.setOffsetY(Config.getOffsetY() - 10.0f);
+				else if (e.key.keysym.sym == SDLK_DOWN)
+					Config.setOffsetY(Config.getOffsetY() + 10.0f);
+				else if (e.key.keysym.sym == SDLK_LEFT)
+					Config.setOffsetX(Config.getOffsetX() - 10.0f);
+				else if (e.key.keysym.sym == SDLK_RIGHT)
+					Config.setOffsetX(Config.getOffsetX() + 10.0f);
+			}
 		}
 	}
 
