@@ -102,12 +102,40 @@ namespace lge {
 					Config.setOffsetX(Config.getOffsetX() - 10.0f);
 				else if (e.key.keysym.sym == SDLK_RIGHT)
 					Config.setOffsetX(Config.getOffsetX() + 10.0f);
+				else if (e.key.keysym.sym == SDLK_EQUALS || e.key.keysym.sym == SDLK_PLUS)
+					Config.setScaleFactor(Config.getScaleFactor() + 0.1f);
+				else if (e.key.keysym.sym == SDLK_MINUS)
+					Config.setScaleFactor(std::max(0.5f, Config.getScaleFactor() - 0.1f));
+			}
+			else if (e.type == SDL_MOUSEWHEEL) {
+				if (e.wheel.y > 0)
+					Config.setScaleFactor(Config.getScaleFactor() + 0.1f);
+				else if (e.wheel.y < 0)
+					Config.setScaleFactor(std::max(0.5f, Config.getScaleFactor() - 0.1f));
+			}
+			else if (e.type == SDL_MOUSEBUTTONDOWN) {
+				if (e.button.button == SDL_BUTTON_LEFT) {
+					Config.setDragging(true);
+					Config.setMouseLastX(e.button.x);
+					Config.setMouseLastY(e.button.y);
+				}
+			}
+			else if (e.type == SDL_MOUSEBUTTONUP) {
+				if (e.button.button == SDL_BUTTON_LEFT)
+					Config.setDragging(false);
+			}
+			else if (e.type == SDL_MOUSEMOTION && Config.getDragging()) {
+			int dx = e.motion.x - Config.getMouseLastX();
+			int dy = e.motion.y - Config.getMouseLastY();
+			Config.setOffsetX(Config.getOffsetX() + dx);
+			Config.setOffsetY(Config.getOffsetY() + dy);
+			Config.setMouseLastX(e.motion.x);
+			Config.setMouseLastY(e.motion.y);
 			}
 		}
 	}
 
-	void Window::render(const Shader &shader, const Buffer &lineBuffer,
-													GLsizei vertexCount) {
+	void Window::render(const Shader &shader, const Buffer &lineBuffer, GLsizei vertexCount) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		std::string err = Buffer::checkError("Post-Clear");
 		if (!err.empty())

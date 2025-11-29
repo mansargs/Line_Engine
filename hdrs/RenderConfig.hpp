@@ -3,14 +3,17 @@
 namespace lge {
 	class renderConfig {
 		private:
-			float scaleFactor{1.0f};
+			bool  dragging {false};
 			bool  topView {true};
 			bool  isometric {false};
+			float scaleFactor{1.0f};
 			float offsetX{0.0f};
 			float offsetY{0.0f};
 			float rotateX{0.0f};
 			float rotateY{0.0f};
 			float rotateZ{0.0f};
+			int mouseLastX{0};
+			int mouseLastY{0};
 		public:
 			float getScaleFactor() const;
 			float getOffsetX() const;
@@ -20,6 +23,9 @@ namespace lge {
 			float getRotateZ() const;
 			bool  getTopView() const;
 			bool  getIsometric() const;
+			bool  getDragging() const;
+			int   getMouseLastX() const;
+			int   getMouseLastY() const;
 			void setScaleFactor(float scale);
 			void setOffsetX(float offset);
 			void setOffsetY(float offset);
@@ -28,5 +34,8 @@ namespace lge {
 			void setRotateZ(float angle);
 			void setTopView(bool top);
 			void setIsometric(bool iso);
+			void setDragging(bool drag);
+			void setMouseLastX(int x);
+			void setMouseLastY(int y);
 	};
 }

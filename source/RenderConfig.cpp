@@ -33,6 +33,17 @@ namespace lge {
 		return isometric;
 	}
 
+	bool renderConfig::getDragging() const {
+		return dragging;
+	}
+
+	int renderConfig::getMouseLastX() const {
+		return mouseLastX;
+	}
+	int renderConfig::getMouseLastY() const {
+		return mouseLastY;
+	}
+
 	void renderConfig::setScaleFactor(float scale) {
 		scaleFactor = scale;
 	}
@@ -64,4 +75,17 @@ namespace lge {
 	void renderConfig::setIsometric(bool iso) {
 		isometric = iso;
 	}
+
+	void renderConfig::setDragging(bool drag) {
+		dragging = drag;
+	}
+
+	void renderConfig::setMouseLastX(int x) {
+		mouseLastX = x;
+	}
+
+	void renderConfig::setMouseLastY(int y) {
+		mouseLastY = y;
+	}
+
 }  // namespace lge
