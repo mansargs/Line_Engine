@@ -7,6 +7,7 @@ namespace lge {
 			bool  topView {true};
 			bool  isometric {false};
 			float scaleFactor{1.0f};
+			float scale {1.0f};
 			float offsetX{0.0f};
 			float offsetY{0.0f};
 			float rotateX{0.0f};
@@ -15,6 +16,7 @@ namespace lge {
 			int mouseLastX{0};
 			int mouseLastY{0};
 		public:
+			float getScale() const;
 			float getScaleFactor() const;
 			float getOffsetX() const;
 			float getOffsetY() const;
@@ -26,6 +28,7 @@ namespace lge {
 			bool  getDragging() const;
 			int   getMouseLastX() const;
 			int   getMouseLastY() const;
+			void setScale(float scale);
 			void setScaleFactor(float scale);
 			void setOffsetX(float offset);
 			void setOffsetY(float offset);

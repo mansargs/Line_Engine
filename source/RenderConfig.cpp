@@ -88,4 +88,12 @@ namespace lge {
 		mouseLastY = y;
 	}
 
+	void renderConfig::setScale(float scaleVal) {
+		scale = scaleVal;
+	}
+
+	float renderConfig::getScale() const {
+		return scale;
+	}
+
 }  // namespace lge

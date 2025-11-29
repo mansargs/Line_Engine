@@ -43,5 +43,6 @@ namespace lge {
 			bool isRunning() const;
 			void startLoop();
 			void swapBuffers();
+			void computeScaleOffset(float mapW, float mapH, Window &lgeWindow, bool isometric);
 	};
 }  // namespace lge

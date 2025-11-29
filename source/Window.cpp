@@ -82,6 +82,27 @@ namespace lge {
 		return instance;
 	}
 
+	void Window::computeScaleOffset(float mapW, float mapH, Window &lgeWindow, bool isometric) {
+		float centerX, centerY, scaleX, scaleY;
+		if (isometric) {
+			centerX = (mapW + mapH) * 0.5f;
+			centerY = (mapH * 0.25f);
+			scaleX = (0.95f * lgeWindow.getWindowWidth()) / (mapW + mapH);
+			scaleY = (0.95f * lgeWindow.getWindowHeight()) / (mapH * 0.5f);
+		} else {
+			centerX = mapW * 0.5f;
+			centerY = mapH * 0.5f;
+			scaleX = (0.95f * lgeWindow.getWindowWidth()) / mapW;
+			scaleY = (0.95f * lgeWindow.getWindowHeight()) / mapH;
+		}
+		lgeWindow.Config.setScale(std::min(scaleX, scaleY));
+		lgeWindow.Config.setOffsetX((lgeWindow.getWindowWidth() * 0.5f)
+									- (lgeWindow.Config.getScale() * centerX));
+		lgeWindow.Config.setOffsetY((lgeWindow.getWindowHeight() * 0.5f)
+									- (lgeWindow.Config.getScale() * centerY));
+	}
+
+
 	void Window::pollEvents() {
 		SDL_Event e;
 		while (SDL_PollEvent(&e)) {
@@ -102,6 +123,18 @@ namespace lge {
 					Config.setOffsetX(Config.getOffsetX() - 10.0f);
 				else if (e.key.keysym.sym == SDLK_RIGHT)
 					Config.setOffsetX(Config.getOffsetX() + 10.0f);
+				else if (e.key.keysym.sym == SDLK_x)
+					Config.setRotateX(Config.getRotateX() + 5.0f);
+				else if (e.key.keysym.sym == SDLK_y)
+					Config.setRotateY(Config.getRotateY() + 5.0f);
+				else if (e.key.keysym.sym == SDLK_z)
+					Config.setRotateZ(Config.getRotateZ() + 5.0f);
+				else if (e.key.keysym.sym == SDLK_j)
+					Config.setRotateX(Config.getRotateX() - 5.0f);
+				else if (e.key.keysym.sym == SDLK_k)
+					Config.setRotateY(Config.getRotateY() - 5.0f);
+				else if (e.key.keysym.sym == SDLK_l)
+					Config.setRotateZ(Config.getRotateZ() - 5.0f);
 				else if (e.key.keysym.sym == SDLK_EQUALS || e.key.keysym.sym == SDLK_PLUS)
 					Config.setScaleFactor(Config.getScaleFactor() + 0.1f);
 				else if (e.key.keysym.sym == SDLK_MINUS)
