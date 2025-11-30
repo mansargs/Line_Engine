@@ -4,14 +4,14 @@ namespace lge {
 	class renderConfig {
 		private:
 			bool  dragging {false};
-			bool  topView {true};
-			bool  isometric {false};
+			bool  topView {false};
+			bool  isometric {true};
 			float scaleFactor{1.0f};
 			float scale {1.0f};
 			float offsetX{0.0f};
 			float offsetY{0.0f};
-			float rotateX{0.0f};
-			float rotateY{0.0f};
+			float rotateX{35.264f};
+			float rotateY{45.0f};
 			float rotateZ{0.0f};
 			int mouseLastX{0};
 			int mouseLastY{0};
