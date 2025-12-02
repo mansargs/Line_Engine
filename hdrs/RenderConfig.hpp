@@ -10,7 +10,7 @@ namespace lge {
 			float scale {1.0f};
 			float offsetX{0.0f};
 			float offsetY{0.0f};
-			float rotateX{35.264f};
+			float rotateX{35.0f};
 			float rotateY{45.0f};
 			float rotateZ{0.0f};
 			int mouseLastX{0};
