@@ -6,9 +6,9 @@
 #include <iostream>
 #include <stdexcept>
 #include <vector>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace lge {
-
 	size_t Window::getWindowHeight() const { return windowHeight; }
 
 	size_t Window::getWindowWidth() const { return windowWidth; }
@@ -16,8 +16,6 @@ namespace lge {
 	void Window::setWindowHeight(unsigned int height) { windowHeight = height; }
 
 	void Window::setWindowWidth(unsigned int width) { windowWidth = width; }
-
-	void Window::startLoop() { running = true; }
 
 	bool Window::isRunning() const { return running; }
 
@@ -64,7 +62,7 @@ namespace lge {
 			throw std::runtime_error("Failed to initialize OpenGL functionality");
 		glEnable(GL_MULTISAMPLE);
 		glViewport(0, 0, static_cast<GLsizei>(windowWidth), static_cast<GLsizei>(windowHeight));
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 			if (SDL_GL_SetSwapInterval(1) < 0)
 				std::cerr << "Warning: Unable to set VSync: " << SDL_GetError() << std::endl;
 	}
@@ -82,26 +80,57 @@ namespace lge {
 		return instance;
 	}
 
-	void Window::computeScaleOffset(float mapW, float mapH, Window &lgeWindow, bool isometric) {
-		float centerX, centerY, scaleX, scaleY;
-		if (isometric) {
-			centerX = (mapW + mapH) * 0.5f;
-			centerY = (mapH * 0.25f);
-			scaleX = (0.95f * lgeWindow.getWindowWidth()) / (mapW + mapH);
-			scaleY = (0.95f * lgeWindow.getWindowHeight()) / (mapH * 0.5f);
+	void Window::resetView(bool iso) {
+		if (iso) {
+			Config.setRotateX(35.0f);
+			Config.setRotateY(45.0f);
 		} else {
-			centerX = mapW * 0.5f;
-			centerY = mapH * 0.5f;
-			scaleX = (0.95f * lgeWindow.getWindowWidth()) / mapW;
-			scaleY = (0.95f * lgeWindow.getWindowHeight()) / mapH;
+			Config.setRotateX(0.0f);
+			Config.setRotateY(0.0f);
 		}
-		lgeWindow.Config.setScale(std::min(scaleX, scaleY));
-		lgeWindow.Config.setOffsetX((lgeWindow.getWindowWidth() * 0.5f)
-									- (lgeWindow.Config.getScale() * centerX));
-		lgeWindow.Config.setOffsetY((lgeWindow.getWindowHeight() * 0.5f)
-									- (lgeWindow.Config.getScale() * centerY));
+		Config.setRotateZ(0.0f);
+		Config.setOffsetX(0.0f);
+		Config.setOffsetY(0.0f);
+		Config.setScaleFactor(1.0f);
+		Config.setTopView(!iso);
+		Config.setIsometric(iso);
+		Config.setDragging(false);
+		Config.setMouseLastX(0);
+		Config.setMouseLastY(0);
 	}
 
+	void Window::keydownHandler(const SDL_Keysym &keyEvent) {
+		if (keyEvent.sym == SDLK_ESCAPE)
+			running = false;
+		else if (keyEvent.sym == SDLK_i)
+			resetView(true);
+		else if (keyEvent.sym == SDLK_t)
+			resetView(false);
+		else if (keyEvent.sym == SDLK_UP || keyEvent.sym == SDLK_w)
+			Config.setOffsetY(Config.getOffsetY() - 10.0f);
+		else if (keyEvent.sym == SDLK_DOWN || keyEvent.sym == SDLK_s)
+			Config.setOffsetY(Config.getOffsetY() + 10.0f);
+		else if (keyEvent.sym == SDLK_LEFT || keyEvent.sym == SDLK_a)
+			Config.setOffsetX(Config.getOffsetX() - 10.0f);
+		else if (keyEvent.sym == SDLK_RIGHT || keyEvent.sym == SDLK_d)
+			Config.setOffsetX(Config.getOffsetX() + 10.0f);
+		else if (keyEvent.sym == SDLK_x && Config.getIsometric())
+			Config.setRotateX(Config.getRotateX() + 5.0f);
+		else if (keyEvent.sym == SDLK_y && Config.getIsometric())
+			Config.setRotateY(Config.getRotateY() + 5.0f);
+		else if (keyEvent.sym == SDLK_z && Config.getIsometric())
+			Config.setRotateZ(Config.getRotateZ() + 5.0f);
+		else if (keyEvent.sym == SDLK_j && Config.getIsometric())
+			Config.setRotateX(Config.getRotateX() - 5.0f);
+		else if (keyEvent.sym == SDLK_k && Config.getIsometric())
+			Config.setRotateY(Config.getRotateY() - 5.0f);
+		else if (keyEvent.sym == SDLK_l && Config.getIsometric())
+			Config.setRotateZ(Config.getRotateZ() - 5.0f);
+		else if (keyEvent.sym == SDLK_EQUALS || keyEvent.sym == SDLK_PLUS)
+			Config.setScaleFactor(Config.getScaleFactor() + 0.1f);
+		else if (keyEvent.sym == SDLK_MINUS)
+			Config.setScaleFactor(std::max(0.5f, Config.getScaleFactor() - 0.1f));
+	}
 
 	void Window::pollEvents() {
 		SDL_Event e;
@@ -109,36 +138,7 @@ namespace lge {
 			if (e.type == SDL_QUIT)
 				running = false;
 			else if (e.type == SDL_KEYDOWN) {
-				if (e.key.keysym.sym == SDLK_ESCAPE)
-					running = false;
-				else if (e.key.keysym.sym == SDLK_i)
-					Config.setIsometric(true);
-				else if (e.key.keysym.sym == SDLK_t)
-					Config.setTopView(true);
-				else if (e.key.keysym.sym == SDLK_UP)
-					Config.setOffsetY(Config.getOffsetY() - 10.0f);
-				else if (e.key.keysym.sym == SDLK_DOWN)
-					Config.setOffsetY(Config.getOffsetY() + 10.0f);
-				else if (e.key.keysym.sym == SDLK_LEFT)
-					Config.setOffsetX(Config.getOffsetX() - 10.0f);
-				else if (e.key.keysym.sym == SDLK_RIGHT)
-					Config.setOffsetX(Config.getOffsetX() + 10.0f);
-				else if (e.key.keysym.sym == SDLK_x)
-					Config.setRotateX(Config.getRotateX() + 5.0f);
-				else if (e.key.keysym.sym == SDLK_y)
-					Config.setRotateY(Config.getRotateY() + 5.0f);
-				else if (e.key.keysym.sym == SDLK_z)
-					Config.setRotateZ(Config.getRotateZ() + 5.0f);
-				else if (e.key.keysym.sym == SDLK_j)
-					Config.setRotateX(Config.getRotateX() - 5.0f);
-				else if (e.key.keysym.sym == SDLK_k)
-					Config.setRotateY(Config.getRotateY() - 5.0f);
-				else if (e.key.keysym.sym == SDLK_l)
-					Config.setRotateZ(Config.getRotateZ() - 5.0f);
-				else if (e.key.keysym.sym == SDLK_EQUALS || e.key.keysym.sym == SDLK_PLUS)
-					Config.setScaleFactor(Config.getScaleFactor() + 0.1f);
-				else if (e.key.keysym.sym == SDLK_MINUS)
-					Config.setScaleFactor(std::max(0.5f, Config.getScaleFactor() - 0.1f));
+				keydownHandler(e.key.keysym);
 			}
 			else if (e.type == SDL_MOUSEWHEEL) {
 				if (e.wheel.y > 0)
@@ -158,14 +158,57 @@ namespace lge {
 					Config.setDragging(false);
 			}
 			else if (e.type == SDL_MOUSEMOTION && Config.getDragging()) {
-			int dx = e.motion.x - Config.getMouseLastX();
-			int dy = e.motion.y - Config.getMouseLastY();
-			Config.setOffsetX(Config.getOffsetX() + dx);
-			Config.setOffsetY(Config.getOffsetY() + dy);
-			Config.setMouseLastX(e.motion.x);
-			Config.setMouseLastY(e.motion.y);
+				int dx = e.motion.x - Config.getMouseLastX();
+				int dy = e.motion.y - Config.getMouseLastY();
+				Config.setOffsetX(Config.getOffsetX() + dx);
+				Config.setOffsetY(Config.getOffsetY() + dy);
+				Config.setMouseLastX(e.motion.x);
+				Config.setMouseLastY(e.motion.y);
 			}
 		}
+	}
+
+	void Window::setupRendering() {
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_DEPTH_TEST);
+		glLineWidth(Config.getLineWidth());
+		running = true;
+	}
+
+	glm::mat4 Window::Rotation() {
+		glm::mat4 R = glm::mat4(1.0f);
+		R *= glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(1, 0, 0));
+		if (Config.getRotateY() != 0.0f)
+			R *= glm::rotate(glm::mat4(1.0f), glm::radians(Config.getRotateY()), glm::vec3(0, 1, 0));
+		if (Config.getRotateX() != 0.0f)
+			R *= glm::rotate(glm::mat4(1.0f), glm::radians(Config.getRotateX()), glm::vec3(1, 0, 0));
+		if (Config.getRotateZ() != 0.0f)
+			R *= glm::rotate(glm::mat4(1.0f), glm::radians(Config.getRotateZ()), glm::vec3(0, 0, 1));
+		return R;
+	}
+
+	glm::mat4 Window::Projection(float projZoom, const Map &lgeMap) {
+		float padding = 1.05f;
+		float aspect = static_cast<float>(windowWidth) / static_cast<float>(windowHeight);
+		float halfX =  lgeMap.getMapWidth() / 2.0f;
+		float halfY = lgeMap.getMapHeight() / 2.0f;
+		float halfZ = Config.getZScale() * ((lgeMap.getMaxZ() - lgeMap.getMinZ()) / 2.0f);
+		float halfDiag = std::sqrt(halfX * halfX + halfY * halfY + halfZ * halfZ);
+		float viewHalf = (halfDiag / projZoom) * padding;
+		float orthoHalfX, orthoHalfY;
+		if (aspect >= 1.0f) {
+			orthoHalfY = viewHalf;
+			orthoHalfX = orthoHalfY * aspect;
+		} else {
+			orthoHalfX = viewHalf;
+			orthoHalfY = orthoHalfX / aspect;
+		}
+		float zHalf = halfDiag;
+		float zBuffer = 1.1f;
+		glm::mat4 Proj = glm::ortho(-orthoHalfX, orthoHalfX, -orthoHalfY, orthoHalfY,
+									-zHalf * zBuffer, zHalf * zBuffer);
+		return Proj;
 	}
 
 	void Window::render(const Shader &shader, const Buffer &lineBuffer, GLsizei vertexCount) {

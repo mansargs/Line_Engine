@@ -1,7 +1,7 @@
 #pragma once
 
 namespace lge {
-	class renderConfig {
+	class RenderConfig {
 		private:
 			bool  dragging {false};
 			bool  topView {false};
@@ -15,11 +15,15 @@ namespace lge {
 			float rotateZ{0.0f};
 			int mouseLastX{0};
 			int mouseLastY{0};
+			float zScale{0};
+			float lineWidth{1};
 		public:
+			float getLineWidth() const;
 			float getScale() const;
 			float getScaleFactor() const;
 			float getOffsetX() const;
 			float getOffsetY() const;
+			float getZScale() const;
 			float getRotateX() const;
 			float getRotateY() const;
 			float getRotateZ() const;
@@ -30,6 +34,7 @@ namespace lge {
 			int   getMouseLastY() const;
 			void setScale(float scale);
 			void setScaleFactor(float scale);
+			void setZScale(float scale);
 			void setOffsetX(float offset);
 			void setOffsetY(float offset);
 			void setRotateX(float angle);
@@ -40,5 +45,6 @@ namespace lge {
 			void setDragging(bool drag);
 			void setMouseLastX(int x);
 			void setMouseLastY(int y);
+			void setLineWidth(float width);
 	};
 }

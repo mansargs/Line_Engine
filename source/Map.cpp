@@ -13,7 +13,7 @@ namespace lge {
 	float Map::getMaxZ() const { return maxZ; }
 
 	float Map::getMinZ() const { return minZ; }
-	
+
 	void Map::addVertex(std::vector<float> &vertex, const Pixel &data) const {
 		vertex.insert(vertex.end(), {
 					data.position.x,
@@ -41,6 +41,16 @@ namespace lge {
 			}
 		}
 		return vertexes;
+	}
+
+	float Map::calculateZScale() {
+		float mapCenterX = mapWidth / 2.0f;
+		float mapCenterY = mapHeight / 2.0f;
+
+		float zRange = getMaxZ() - getMinZ();
+		float xyDiagonal = std::sqrt(mapCenterX * mapCenterX + mapCenterY * mapCenterY);
+		float zScale = (zRange > 0.0f) ? (xyDiagonal * 2.0f) / zRange : 1.0f;
+		return zScale * 0.05f;
 	}
 
 	Map &Map::getInstance() {

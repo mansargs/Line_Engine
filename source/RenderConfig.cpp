@@ -1,99 +1,114 @@
 #include "../hdrs/RenderConfig.hpp"
 
 namespace lge {
-	float renderConfig::getScaleFactor() const {
+	float RenderConfig::getScaleFactor() const {
 		return scaleFactor;
 	}
 
-	float renderConfig::getOffsetX() const {
+	float RenderConfig::getOffsetX() const {
 		return offsetX;
 	}
 
-	float renderConfig::getOffsetY() const {
+	float RenderConfig::getOffsetY() const {
 		return offsetY;
 	}
 
-	float renderConfig::getRotateX() const {
+	float RenderConfig::getRotateX() const {
 		return rotateX;
 	}
 
-	float renderConfig::getRotateY() const {
+	float RenderConfig::getRotateY() const {
 		return rotateY;
 	}
 
-	float renderConfig::getRotateZ() const {
+	float RenderConfig::getRotateZ() const {
 		return rotateZ;
 	}
 
-	bool renderConfig::getTopView() const {
+	bool RenderConfig::getTopView() const {
 		return topView;
 	}
 
-	bool renderConfig::getIsometric() const {
+	bool RenderConfig::getIsometric() const {
 		return isometric;
 	}
 
-	bool renderConfig::getDragging() const {
+	bool RenderConfig::getDragging() const {
 		return dragging;
 	}
 
-	int renderConfig::getMouseLastX() const {
+	int RenderConfig::getMouseLastX() const {
 		return mouseLastX;
 	}
-	int renderConfig::getMouseLastY() const {
+	int RenderConfig::getMouseLastY() const {
 		return mouseLastY;
 	}
 
-	void renderConfig::setScaleFactor(float scale) {
+	void RenderConfig::setScaleFactor(float scale) {
 		scaleFactor = scale;
 	}
 
-	void renderConfig::setOffsetX(float offset) {
+	void RenderConfig::setOffsetX(float offset) {
 		offsetX = offset;
 	}
 
-	void renderConfig::setOffsetY(float offset) {
+	void RenderConfig::setOffsetY(float offset) {
 		offsetY = offset;
 	}
 
-	void renderConfig::setRotateX(float angle) {
+	void RenderConfig::setRotateX(float angle) {
 		rotateX = angle;
 	}
 
-	void renderConfig::setRotateY(float angle) {
+	void RenderConfig::setRotateY(float angle) {
 		rotateY = angle;
 	}
 
-	void renderConfig::setRotateZ(float angle) {
+	void RenderConfig::setRotateZ(float angle) {
 		rotateZ = angle;
 	}
 
-	void renderConfig::setTopView(bool top) {
+	void RenderConfig::setTopView(bool top) {
 		topView = top;
 	}
 
-	void renderConfig::setIsometric(bool iso) {
+	void RenderConfig::setIsometric(bool iso) {
 		isometric = iso;
 	}
 
-	void renderConfig::setDragging(bool drag) {
+	void RenderConfig::setDragging(bool drag) {
 		dragging = drag;
 	}
 
-	void renderConfig::setMouseLastX(int x) {
+	void RenderConfig::setMouseLastX(int x) {
 		mouseLastX = x;
 	}
 
-	void renderConfig::setMouseLastY(int y) {
+	void RenderConfig::setMouseLastY(int y) {
 		mouseLastY = y;
 	}
 
-	void renderConfig::setScale(float scaleVal) {
+	void RenderConfig::setScale(float scaleVal) {
 		scale = scaleVal;
 	}
 
-	float renderConfig::getScale() const {
+	float RenderConfig::getScale() const {
 		return scale;
 	}
 
+	float RenderConfig::getZScale() const {
+		return zScale;
+	}
+
+	void RenderConfig::setZScale(float scale) {
+		zScale = scale;
+	}
+
+	float RenderConfig::getLineWidth() const {
+		return lineWidth;
+	}
+
+	void RenderConfig::setLineWidth(float width) {
+		lineWidth = width;
+	}
 }  // namespace lge

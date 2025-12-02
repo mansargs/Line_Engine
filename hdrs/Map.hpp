@@ -4,26 +4,15 @@
 #include <SDL2/SDL.h>
 #include <string>
 #include <vector>
+#include <glm/glm.hpp>
 
 namespace lge {
 
 	using gridFile = std::vector<std::vector<std::string>>;
 
-	struct Coord3 {
-		float x = 0.0f;
-		float y = 0.0f;
-		float z = 0.0f;
-	};
-
-	struct Rgba {
-		float r = 0.0f;
-		float g = 0.0f;
-		float b = 0.0f;
-	};
-
 	struct Pixel {
-		Coord3 position;
-		Rgba color;
+		glm::vec3 position{0.0f};
+		glm::vec3 color{0.0f};
 	};
 
 	class Map {
@@ -41,6 +30,7 @@ namespace lge {
 			static bool validColor(const std::string &strColor);
 			static bool validNumber(const std::string &strNumber);
 			void cellColor(Pixel &cell, const std::string &color);
+			glm::vec3 getLeveledColor(float level, float z);
 			void addVertex(std::vector<float> &vertex, const Pixel &data) const;
 		private:
 			Map() = default;
@@ -56,6 +46,7 @@ namespace lge {
 			float getMaxZ() const;
 			float getMinZ() const;
 			static bool verifyFile(const std::string &filename);
+			float calculateZScale();
 			std::vector<float> getMapVertexes() const;
 	};
 }

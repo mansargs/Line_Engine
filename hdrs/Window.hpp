@@ -24,13 +24,15 @@ namespace lge {
 			SDL_GLContext glContext{nullptr};
 
 			void checkSdlError(const std::string& context);
+			void keydownHandler(const SDL_Keysym &keyEvent);
+			void resetView(bool iso);
 			Window();
 			Window(const Window&) = delete;
 			Window& operator=(const Window&) = delete;
 			Window(Window&&) = delete;
 			Window& operator=(Window&&) = delete;
 		public:
-			renderConfig Config;
+			RenderConfig Config;
 			~Window();
 			static Window& getInstance();
 			size_t getWindowHeight() const;
@@ -41,8 +43,9 @@ namespace lge {
 			void pollEvents();
 			void render(const Shader &shader, const Buffer &lineBuffer, GLsizei vertexCount);
 			bool isRunning() const;
-			void startLoop();
 			void swapBuffers();
-			void computeScaleOffset(float mapW, float mapH, Window &lgeWindow, bool isometric);
+			void setupRendering();
+			glm::mat4 Rotation();
+			glm::mat4 Projection(float projZoom, const Map &lgeMap);
 	};
 }  // namespace lge
