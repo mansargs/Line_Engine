@@ -87,10 +87,10 @@ namespace lge {
 					zAxis = mapContent[i][j].substr(0, found);
 					color = mapContent[i][j].substr(found + 1);
 				}
-				if (!validNumber(zAxis))
+				if (!validNumber(zAxis) || !validColor(color)) {
+					std::cerr << "Error: Invalid number or color format in cell\n";
 					return -1;
-				if (!validColor(color))
-					return -1;
+				}
 				mapData[i][j].position.x = static_cast<float> (j);
 				mapData[i][j].position.y = static_cast<float> (i);
 				mapData[i][j].position.z = static_cast<float> (std::stoi(zAxis));
@@ -109,7 +109,7 @@ namespace lge {
 		std::string cell;
 		size_t widthEach = 0;
 		std::vector<std::string> row;
-		
+
 		while (lineStream >> cell) {
 			row.push_back(cell);
 			++widthEach;
@@ -118,8 +118,10 @@ namespace lge {
 			std::cerr << "Error reading line\n";
 			return -1;
 		}
-		mapContent.push_back(row);
-		++mapHeight;
+		if (row.size() != 0) {
+			mapContent.push_back(row);
+			++mapHeight;
+		}
 		if (mapHeight == 1) {
 			mapWidth = widthEach;
 		} else if (widthEach != mapWidth) {
@@ -139,6 +141,10 @@ namespace lge {
 
 		if (file.is_open()) {
 			while (std::getline(file, line)) {
+				if (line.empty() || std::all_of(line.begin(), line.end(), isspace)) {
+					std::cerr << "Error: Empty line in map file\n";
+					return -1;
+				}
 				if (parseLine(line, mapContent) != 0)
 					return -1;
 			}
@@ -150,7 +156,8 @@ namespace lge {
 			std::cerr << "Error opening file\n";
 			return -1;
 		}
-		convertToPixels(mapContent);
+		if (convertToPixels(mapContent) != 0)
+			return -1;
 		return 0;
 	};
 } // namespace lge

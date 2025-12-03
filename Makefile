@@ -4,7 +4,6 @@ CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++17
 INCLUDES = `sdl2-config --cflags`
 LDFLAGS  = `sdl2-config --libs`  -lGLEW -lGL
-
 SRC_DIR = source
 BUILD_DIR = build
 OBJ_DIR = $(BUILD_DIR)/obj
