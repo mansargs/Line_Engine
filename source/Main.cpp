@@ -33,7 +33,7 @@ int main(int argc, const char *argv[]) {
 		while (lgeWindow.isRunning()) {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			lgeWindow.pollEvents();
-			float projZoom = 1.2f * lgeWindow.Config.getScale() * lgeWindow.Config.getScaleFactor();
+			float projZoom = 0.9 * lgeWindow.Config.getScale() * lgeWindow.Config.getScaleFactor();
 			float translationStep = 0.5f / projZoom;
 			float offsetX = lgeWindow.Config.getOffsetX() * translationStep;
 			float offsetY = -lgeWindow.Config.getOffsetY() * translationStep;
@@ -48,8 +48,8 @@ int main(int argc, const char *argv[]) {
 			lgeWindow.render(shader, lineBuffer, vertexCount);
 			lgeWindow.swapBuffers();
 		}
-	} catch (...){
-		std::cerr << "\033[31mAn unexpected error occurred!\033[0m\n";
+	} catch (const std::exception &e) {
+		std::cerr << "\033[31mError: " << e.what() << "\033[0m\n";
 		return EXIT_FAILURE;
 	}
 	return EXIT_SUCCESS;

@@ -1,0 +1,45 @@
+#!/bin/bash
+ENGINE_PATH="$(dirname "$0")/build/bin/LineEngine"
+WORK_DIR="$(dirname "$0")"
+cd "$WORK_DIR" || { echo "Failed to set working directory: $WORK_DIR"; exit 1; }
+
+if [ ! -f "$ENGINE_PATH" ]; then
+	echo "LineEngine binary not found at $ENGINE_PATH"
+	exit 1
+fi
+
+if [ -z "$1" ]; then
+	echo "No file provided; opening file chooser..." >&2
+	if command -v zenity &> /dev/null; then
+		SELECTED_FILE=$(zenity --file-selection \
+			--title="Select a LineEngine map file" \
+			--filename="$WORK_DIR/test_maps/" 2>/dev/null)
+		ZENITY_EXIT=$?
+		if [ $ZENITY_EXIT -ne 0 ] || [ -z "$SELECTED_FILE" ]; then
+			echo "No map file selected. Exiting." >&2
+			exit 0
+		fi
+	else
+		echo "Zenity not installed. Falling back to default map." >&2
+		SELECTED_FILE=$(ls "$WORK_DIR/test_maps/"*.lge 2>/dev/null | head -1)
+		if [ -z "$SELECTED_FILE" ]; then
+			echo "No .lge files found in test_maps/. Please add one or install zenity (sudo pacman -S zenity)." >&2
+			exit 1
+		fi
+		echo "Launching default map: $SELECTED_FILE" >&2
+	fi
+
+	if [ ! -f "$SELECTED_FILE" ]; then
+		echo "Selected file not found: $SELECTED_FILE" >&2
+		exit 1
+	fi
+	echo "Launching with: $SELECTED_FILE" >&2
+	exec "$ENGINE_PATH" "$SELECTED_FILE"
+else
+	if [ ! -f "$1" ]; then
+		echo "File not found: $1" >&2
+		exit 1
+	fi
+	echo "Launching with: $1" >&2
+	exec "$ENGINE_PATH" "$1"
+fi

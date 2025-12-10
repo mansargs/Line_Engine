@@ -127,9 +127,9 @@ namespace lge {
 		else if (keyEvent.sym == SDLK_l && Config.getIsometric())
 			Config.setRotateZ(Config.getRotateZ() - 5.0f);
 		else if (keyEvent.sym == SDLK_EQUALS || keyEvent.sym == SDLK_PLUS)
-			Config.setScaleFactor(Config.getScaleFactor() + 0.1f);
+			Config.setScaleFactor(Config.getScaleFactor() + 0.2f);
 		else if (keyEvent.sym == SDLK_MINUS)
-			Config.setScaleFactor(std::max(0.5f, Config.getScaleFactor() - 0.1f));
+			Config.setScaleFactor(std::max(0.5f, Config.getScaleFactor() - 0.2f));
 	}
 
 	void Window::pollEvents() {
@@ -142,9 +142,9 @@ namespace lge {
 			}
 			else if (e.type == SDL_MOUSEWHEEL) {
 				if (e.wheel.y > 0)
-					Config.setScaleFactor(Config.getScaleFactor() + 0.1f);
+					Config.setScaleFactor(Config.getScaleFactor() + 0.2f);
 				else if (e.wheel.y < 0)
-					Config.setScaleFactor(std::max(0.5f, Config.getScaleFactor() - 0.1f));
+					Config.setScaleFactor(std::max(0.5f, Config.getScaleFactor() - 0.2f));
 			}
 			else if (e.type == SDL_MOUSEBUTTONDOWN) {
 				if (e.button.button == SDL_BUTTON_LEFT) {
