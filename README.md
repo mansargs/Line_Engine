@@ -89,4 +89,9 @@ Contributions and bug reports are welcome. Open an issue or submit a pull reques
 
 ## License
 
-This project does not include a license file. If you want this repository to be explicitly open-source, add a `LICENSE` file describing the terms.
+This project is open source and free to use by anyone.
+You are allowed to use, modify, distribute, and build upon this code for any purpose, including commercial use.
+No permission is required.
+However, this project is provided "as is", without any warranty or liability.
+Copyright (c) 2026 Manvel Sargsyan
+
