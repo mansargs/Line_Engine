@@ -49,15 +49,15 @@ namespace lge {
 		size_t i = 0;
 		if (strColor.empty())
 			return true;
+		if ( strColor.length() < 3 || strColor.length() > 8)
+			return false;
 		if (strColor[i] != '0' || (strColor[i + 1] != 'x' && strColor[i + 1] != 'X'))
 			return false;
 		i += 2;
-		if ( strColor.length() < 3 || strColor.length() > 8)
-			return false;
 		for (; i < strColor.length(); ++i) {
 			if (!std::isxdigit(static_cast<unsigned char>(strColor[i])))
 				return false;
 		}
 		return true;
 	}
-} 
+}

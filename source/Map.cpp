@@ -28,6 +28,8 @@ namespace lge {
 
 	std::vector<float> Map::getMapVertexes() const {
 		std::vector<float> vertexes;
+		if (mapWidth == 0 || mapHeight == 0)
+			throw std::runtime_error("Invalid content");
 		for (size_t i = 0; i < mapHeight; ++i) {
 			for (size_t j = 0; j < mapWidth - 1; ++j) {
 				addVertex(vertexes, mapData[i][j]);

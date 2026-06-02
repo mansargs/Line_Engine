@@ -31,7 +31,6 @@ int main(int argc, const char *argv[]) {
 		shader.use();
 		lgeWindow.setupRendering();
 		while (lgeWindow.isRunning()) {
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			lgeWindow.pollEvents();
 			float projZoom = 0.9 * lgeWindow.Config.getScale() * lgeWindow.Config.getScaleFactor();
 			float translationStep = 0.5f / projZoom;

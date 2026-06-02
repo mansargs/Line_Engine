@@ -5,13 +5,6 @@ layout(location = 1) in vec4 aColor;
 
 out vec4 vertexColor;
 
-uniform float windowHeight;
-uniform float windowWidth;
-uniform float gridHeight;
-uniform float gridWidth;
-uniform float maxZ;
-uniform float minZ;
-
 uniform mat4 uMVP;
 
 void main() {

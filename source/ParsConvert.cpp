@@ -96,7 +96,7 @@ namespace lge {
 				mapData[i][j].position.z = static_cast<float> (std::stoi(zAxis));
 				if (mapData[i][j].position.z > maxZ)
 					maxZ = mapData[i][j].position.z;
-				else if (mapData[i][j].position.z < minZ)
+				if (mapData[i][j].position.z < minZ)
 					minZ = mapData[i][j].position.z;
 				cellColor(mapData[i][j], color);
 			}
@@ -114,13 +114,13 @@ namespace lge {
 			row.push_back(cell);
 			++widthEach;
 		}
-		if (!lineStream.eof()) {
-			std::cerr << "Error reading line\n";
-			return -1;
-		}
 		if (row.size() != 0) {
 			mapContent.push_back(row);
 			++mapHeight;
+		}
+		if (!lineStream.eof()) {
+			std::cerr << "Error reading line\n";
+			return -1;
 		}
 		if (mapHeight == 1) {
 			mapWidth = widthEach;
@@ -141,7 +141,7 @@ namespace lge {
 
 		if (file.is_open()) {
 			while (std::getline(file, line)) {
-				if (line.empty() || std::all_of(line.begin(), line.end(), isspace)) {
+				if (line.empty() || std::all_of(line.begin(), line.end(),[](unsigned char c) { return std::isspace(c); })) {
 					std::cerr << "Error: Empty line in map file\n";
 					return -1;
 				}

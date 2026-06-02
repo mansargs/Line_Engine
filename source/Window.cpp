@@ -45,16 +45,18 @@ namespace lge {
 			throw std::runtime_error("SDL_Init failed: " + std::string(SDL_GetError()));
 		setWindowByDisplay();
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 5);
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, GL_MAJOR);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, GL_MINOR);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 		window = SDL_CreateWindow("Line Engine",
 								SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 								static_cast<int>(windowWidth),
 								static_cast<int>(windowHeight),
 								SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+		if (!window)
+			throw std::runtime_error("SDL_CreateWindow failed: " + std::string(SDL_GetError()));
 		checkSdlError("Create Window");
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, GL_MAJOR);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, GL_MINOR);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 		glContext = SDL_GL_CreateContext(window);
 		checkSdlError("Create GL Context");
 		glewExperimental = GL_TRUE;
