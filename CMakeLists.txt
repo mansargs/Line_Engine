@@ -4,7 +4,6 @@ project(LineEngine LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Choose Release by default
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
@@ -26,9 +25,9 @@ include_directories(${CMAKE_SOURCE_DIR}/Shaders)
 # ------------------------------------------------------------------------------
 
 find_package(OpenGL REQUIRED)
-find_package(SDL2 QUIET)
-find_package(GLEW QUIET)
-find_package(glm QUIET)
+find_package(SDL2 REQUIRED)
+find_package(GLEW REQUIRED)
+find_package(glm REQUIRED)
 
 # --- SDL2 fallback to pkg-config ---
 find_package(PkgConfig QUIET)

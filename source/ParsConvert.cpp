@@ -53,7 +53,7 @@ namespace lge {
 	void Map::cellColor(Pixel &cell, const std::string &color) {
 		if (color.empty()) {
 			if (std::fabs(cell.position.z) < 0.1f) {
-				cell.color = {2550.0f, 255.0f, 255.0f};
+				cell.color = {255.0f, 255.0f, 255.0f};
 				return;
 			}
 			float absZ = std::fabs(cell.position.z);

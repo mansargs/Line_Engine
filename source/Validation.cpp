@@ -60,4 +60,4 @@ namespace lge {
 		}
 		return true;
 	}
-} // namespace lge
+} 

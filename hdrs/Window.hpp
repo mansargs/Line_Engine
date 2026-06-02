@@ -48,4 +48,4 @@ namespace lge {
 			glm::mat4 Rotation();
 			glm::mat4 Projection(float projZoom, const Map &lgeMap);
 	};
-}  // namespace lge
+}
