@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-lge">
+    <comment>LineEngine map</comment>
+    <comment xml:lang="en">LineEngine 3D line map</comment>
+    <glob pattern="*.lge"/>
+    <icon name="lineengine"/>
+  </mime-type>
+</mime-info>

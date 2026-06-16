@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=LineEngine
+GenericName=Line Map Viewer
+Comment=View 3D line maps from .lge files
+Exec=@CMAKE_INSTALL_FULL_BINDIR@/lineengine %f
+TryExec=@CMAKE_INSTALL_FULL_BINDIR@/lineengine
+Icon=lineengine
+Terminal=false
+Categories=Graphics;Viewer;
+MimeType=application/x-lge;
+StartupNotify=true
+Keywords=map;lines;3d;lge;viewer;
